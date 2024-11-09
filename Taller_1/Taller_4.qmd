@@ -4,7 +4,7 @@ title: "Taller RML (Parte 1) - Gr4"
 lang: es
 author: 
   - Luis David Hernandez
-  - Daniel Felipe villa
+  - Daniel Felipe villa Rengifo
   - Juan Gabriel Carvajal
 format: pdf
 execute: 
@@ -28,6 +28,7 @@ library(GGally)
 1.  Realice una descripción de la base de datos. Contextualice el problema y explique cada una de las variables involucradas en el modelo. (https://www.codersarts.com/post/predict-boston-house-prices-using-python-linear-regression).
 
 # Descripción de la base de datos
+
 Tomaremos el conjunto de datos de Vivienda que contiene información sobre diferentes casas en Boston. Hay 506 muestras y 13 variables de características en este conjunto de datos. El objetivo es predecir el valor de los precios de la casa utilizando las características dadas.
 
 La descripción de todas las características se proporciona a continuación:
