@@ -23,6 +23,7 @@ library(rsm)
 library(rgl)
 library(scatterplot3d)
 library(GGally)
+require(glue)
 ```
 
 1.  Realice una descripción de la base de datos. Contextualice el problema y explique cada una de las variables involucradas en el modelo. (https://www.codersarts.com/post/predict-boston-house-prices-using-python-linear-regression).
@@ -65,7 +66,9 @@ Los precios de las viviendas indicados por la variable **MEDV** son nuestra vari
 #| echo: false
 #| fig-width: 10
 #| fig-height: 7
-datos <- read.csv("C:\\Users\\Juan Carvajal\\OneDrive - Universidad Nacional de Colombia\\Material Universidad\\Regresion_pos\\Bases_de_datos\\boston.csv")
+user <- Sys.getenv("USERNAME")
+ruta <- glue("C:/Users/{user}/Documents/GitHub/Modelos_Regresion/Taller_1/Bases_de_datos/boston.csv")
+datos <- read.csv(ruta)
 
 datos4 <-datos[401:500,c(1,5,6,7,11,13,14)]
 
