@@ -3,9 +3,9 @@ subtitle: "Departamento de Estadística - UNALMED"
 title: "Taller RML (Parte 1) - Gr4"
 lang: es
 author: 
-  - Luis David Hernandez
+  - Luis David Hernandez Peréz
   - Daniel Felipe villa Rengifo
-  - Juan Gabriel Carvajal
+  - Juan Gabriel Carvajal Negrete
 format: pdf
 execute: 
   fig-align: center 
@@ -66,9 +66,7 @@ Los precios de las viviendas indicados por la variable **MEDV** son nuestra vari
 #| echo: false
 #| fig-width: 10
 #| fig-height: 7
-user <- Sys.getenv("USERNAME")
-ruta <- glue("C:/Users/{user}/Documents/GitHub/Modelos_Regresion/Taller_1/Bases_de_datos/boston.csv")
-datos <- read.csv(ruta)
+datos <- read.csv("C:\\Users\\Juan Carvajal\\OneDrive - Universidad Nacional de Colombia\\Material Universidad\\Regresion_pos\\Bases_de_datos\\boston.csv")
 
 datos4 <-datos[401:500,c(1,5,6,7,11,13,14)]
 
@@ -119,3 +117,4 @@ LSTAT & -0.46531 & 0.08208 & -5.669 & 1.61e-07 * \\ \hline
 \end{table}
 
 El modelo de regresión lineal presentado busca predecir el valor medio de las viviendas (MEDV) en Boston, encontrando que la criminalidad (CRIM), la contaminación (NOX) y el nivel socioeconómico (LSTAT) son los predictores más importantes, con coeficientes negativos y significativos. Mientras que el número de habitaciones (RM), la edad de las viviendas (AGE) y la calidad de la educación (PTRATIO) no muestran una influencia significativa en este modelo. El intercepto (59.06933) representa el valor estimado de una vivienda cuando todas las variables predictoras son cero, pero debe interpretarse con cautela. Se podrían realizar mejoras al modelo, como eliminar variables no significativas, verificar la multicolinealidad, explorar otras variables relevantes (distancia a empleos, áreas verdes), considerar interacciones entre variables y evaluar posibles relaciones no lineales.
+
