@@ -23,6 +23,9 @@ library(rsm)
 library(rgl)
 library(scatterplot3d)
 library(GGally)
+require(xtable)
+require(magrittr)
+require(glue)
 ```
 
 1.  Realice una descripción de la base de datos. Contextualice el problema y explique cada una de las variables involucradas en el modelo. (https://www.codersarts.com/post/predict-boston-house-prices-using-python-linear-regression).
@@ -117,3 +120,34 @@ LSTAT & -0.46531 & 0.08208 & -5.669 & 1.61e-07 * \\ \hline
 
 El modelo de regresión lineal presentado busca predecir el valor medio de las viviendas (MEDV) en Boston, encontrando que la criminalidad (CRIM), la contaminación (NOX) y el nivel socioeconómico (LSTAT) son los predictores más importantes, con coeficientes negativos y significativos. Mientras que el número de habitaciones (RM), la edad de las viviendas (AGE) y la calidad de la educación (PTRATIO) no muestran una influencia significativa en este modelo. El intercepto (59.06933) representa el valor estimado de una vivienda cuando todas las variables predictoras son cero, pero debe interpretarse con cautela. Se podrían realizar mejoras al modelo, como eliminar variables no significativas, verificar la multicolinealidad, explorar otras variables relevantes (distancia a empleos, áreas verdes), considerar interacciones entre variables y evaluar posibles relaciones no lineales.
 
+# Ecuación del modelo
+
+$$
+\hat{y}_0 = 59.06933 -0.08634x_1 - 21.92000x_2 + 0.26285x_3 - 0.01242x_4 - 1.001242x_5 - 1.00533x_6 - 0.46531x_7
+$$
+
+# Tabla de variabilidad del modelo (Tabla  Anova)
+
+```{r}
+#| echo: false
+#| include: false
+anova(modelo)
+```
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+  \hline
+  & \textbf{Df} & \textbf{Sum Sq} & \textbf{Mean Sq} & \textbf{F value} & \textbf{Pr($>$F)} \\ 
+  \hline
+  \textbf{Prueba1} & 1 & 0.13 & 0.13 & 0.00 & 0.9628 \\ 
+  \textbf{Prueba2} & 1 & 1739.90 & 1739.90 & 31.08 & 0.0001 \\ 
+  \textbf{Prueba3} & 1 & 4138.43 & 4138.43 & 73.92 & 0.0000 \\ 
+  \textbf{Prueba4} & 1 & 608.37 & 608.37 & 10.87 & 0.0049 \\ 
+  \textbf{Residuals} & 15 & 839.72 & 55.98 &  &  \\ 
+   \hline
+\end{tabular}
+\caption{Resultados de las pruebas estadísticas}
+\end{table}
+
+## Comentarios
