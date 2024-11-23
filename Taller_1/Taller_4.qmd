@@ -105,6 +105,7 @@ modelo <- lm(MEDV~.,datos4)
 
 \begin{table}[h!]
 \centering
+\caption{resumen del modelo de regresión}
 \begin{tabular}{|c|c|c|c|c|}
 \hline
 \textbf{Coeficientes} & \textbf{Estimación} & \textbf{Error Estándar} & \textbf{Valor t} & \textbf{Pr(>|t|)} \\ \hline
@@ -123,10 +124,10 @@ El modelo de regresión lineal presentado busca predecir el valor medio de las v
 # Ecuación del modelo
 
 $$
-\hat{y}_0 = 59.06933 -0.08634x_1 - 21.92000x_2 + 0.26285x_3 - 0.01242x_4 - 1.001242x_5 - 1.00533x_6 - 0.46531x_7
+\hat{y}_0 = 59.06933 -0.08634x_1 - 21.92000x_2 + 0.26285x_3 - 0.01242x_4 - 1.001242x_5 - 1.00533x_6 - 0.46531x_7 + \epsilon_i
 $$
 
-# Tabla de variabilidad del modelo (Tabla  Anova)
+# Tabla de variabilidad del modelo (Tabla Anova)
 
 ```{r}
 #| echo: false
@@ -136,6 +137,7 @@ anova(modelo)
 
 \begin{table}[ht]
 \centering
+\caption{Resultados de las pruebas estadísticas}
 \begin{tabular}{|c|c|c|c|c|c|}
   \hline
   & \textbf{Df} & \textbf{Sum Sq} & \textbf{Mean Sq} & \textbf{F value} & \textbf{Pr($>$F)} \\ 
@@ -147,7 +149,18 @@ anova(modelo)
   \textbf{Residuals} & 15 & 839.72 & 55.98 &  &  \\ 
    \hline
 \end{tabular}
-\caption{Resultados de las pruebas estadísticas}
 \end{table}
 
 ## Comentarios
+
+4.  Pruebe la significancia individual de cada uno de los parámetros del modelo (excepto intercepto), usando la prueba $t$, y para dos cualesquiera de las predictoras, establezca claramente la prueba de hipótesis y el criterio de decisión.
+
+# Pruebas de hipótesis
+
+
+$$
+H_0: \beta_1 = 0 ~ ~ vs ~ ~ H_1: \beta_1 \neq 0
+$$
+
+
+
