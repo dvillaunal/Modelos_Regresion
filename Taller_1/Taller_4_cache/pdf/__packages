@@ -8,3 +8,5 @@ GGally
 xtable
 magrittr
 glue
+pander
+kableExtra

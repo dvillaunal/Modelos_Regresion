@@ -1,6 +1,6 @@
 ---
 subtitle: "Departamento de Estadística - UNALMED"
-title: "Taller RML (Parte 1) - Gr4"
+title: "Taller RML (Parte 1) - Grupo 4"
 lang: es
 author: 
   - Luis David Hernandez Peréz
@@ -10,27 +10,31 @@ format: pdf
 execute: 
   fig-align: center 
   cache: true
-editor: visual
+editor: source
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r}
-#| include: false
+#| include: false 
 #| warning: false
 library(car)
 library(rsm)
 library(rgl)
 library(scatterplot3d)
 library(GGally)
-require(xtable)
-require(magrittr)
-require(glue)
+library(xtable)
+library(magrittr)
+library(glue)
+library(pander)
+library(kableExtra)
 ```
 
-1.  Realice una descripción de la base de datos. Contextualice el problema y explique cada una de las variables involucradas en el modelo. (https://www.codersarts.com/post/predict-boston-house-prices-using-python-linear-regression).
+## Punto 1
 
-# Descripción de la base de datos
+Realice una descripción de la base de datos. Contextualice el problema y explique cada una de las variables involucradas en el modelo. <https://www.codersarts.com/post/predict-boston-house-prices-using-python-linear-regression
+
+## Descripción de la base de datos
 
 Tomaremos el conjunto de datos de Vivienda que contiene información sobre diferentes casas en Boston. Hay 506 muestras y 13 variables de características en este conjunto de datos. El objetivo es predecir el valor de los precios de la casa utilizando las características dadas.
 
@@ -58,9 +62,11 @@ La descripción de todas las características se proporciona a continuación:
 
 -   **MEDV**: Valor medio de las viviendas ocupadas por sus propietarios en miles de dólares
 
-Los precios de las viviendas indicados por la variable **MEDV** son nuestra variable objetivo y las restantes son las variables características en función de las cuales predeciremos el valor de una vivienda.
+Los precios de las viviendas, representados por la variable **MEDV**, constituyen nuestra variable objetivo. El resto de las variables actuarán como características que utilizaremos para predecir el valor de una vivienda.
 
-2.  Realice un análisis descriptivo de las variables que se van a tener en cuenta en el modelo. Concluya.
+# Punto 2
+
+Realice un análisis descriptivo de las variables que se van a tener en cuenta en el modelo. Concluya.
 
 ```{r}
 #| message: false
@@ -73,12 +79,13 @@ datos <- read.csv("Bases_de_datos/boston.csv")
 datos4 <-datos[401:500,c(1,5,6,7,11,13,14)]
 
 
-gg2<-ggpairs(datos4,upper=list(continuous = wrap("smooth",alpha = 0.3, size=1.2,method = "lm")),lower=list(continuous ="cor"))
-for(i in 1:ncol(datos4)){
-gg2[i,i]<-gg2[i,i]+
-geom_histogram(breaks=hist(datos4[,i],breaks = "FD",plot=F)$breaks,colour = "tomato",fill="lightgoldenrod1")
-}
-gg2
+# gg2<-ggpairs(datos4,upper=list(continuous = wrap("smooth",alpha = 0.3, size=1.2,
+#                                                  method = "lm")),lower=list(continuous ="cor"))
+# for(i in 1:ncol(datos4)){
+# gg2[i,i]<-gg2[i,i]+
+# geom_histogram(breaks=hist(datos4[,i],breaks = "FD",plot=F)$breaks,colour = "tomato",fill="lightgoldenrod1")
+# }
+# gg2
 ```
 
 **Correlaciones**: MEDV tiene una fuerte correlación positiva con RM (número promedio de habitaciones por vivienda), lo que indica que las viviendas con más habitaciones tienden a tener un valor más alto. Por otro lado, MEDV tiene una fuerte correlación negativa con LSTAT (porcentaje de la población de estatus inferior), lo que sugiere que las viviendas en áreas con mayor porcentaje de población de bajos ingresos tienden a tener un valor más bajo.
@@ -97,7 +104,6 @@ datos4 %>% ggplot(aes(x=MEDV))+
   theme_bw() +
   theme(axis.title.y = element_blank())
 ```
-
 
 Vemos que los valores de la variable `MEDV` se distribuyen no normales y en su mayoría agrupados por lo cual podríamos decir que no hay presencia de datos atípicos.
 
@@ -134,13 +140,12 @@ datos4 %>% ggplot(aes(y=MEDV, x=LSTAT)) +
 
 Podemos notar que los precios de los hogares aumentan a medida que el valor de la variable `RM` aumenta "linealmente". Hay pocos valores atípicos y los datos parecen tener cierto limite en 9.
 
-
 Los precios tienden a disminuir a medida que aumenta la variable `LSTAT`. aunque no parece seguir exactamente una tendencia lineal "cuadrática o exponencial".
 
 
+# Punto 3
 
-3.  Ajuste un modelo de regresión lineal múltiple, muestre la tabla de parámetros ajustados y escriba la ecuación ajustada. Calcule la Anova del modelo ¿Es significativo el modelo? ¿Qué proporción de la variabilidad total de la respuesta es explicada por el modelo? Opine sobre esto último.
-
+Ajuste un modelo de regresión lineal múltiple, muestre la tabla de parámetros ajustados y escriba la ecuación ajustada. Calcule la Anova del modelo ¿Es significativo el modelo? ¿Qué proporción de la variabilidad total de la respuesta es explicada por el modelo? Opine sobre esto último.
 
 ```{r}
 # Modelo de regresión lineal múltiple con todas las variables 
@@ -165,14 +170,13 @@ LSTAT & -0.46531 & 0.08208 & -5.669 & 1.61e-07 * \\ \hline
 
 El modelo de regresión lineal presentado busca predecir el valor medio de las viviendas (MEDV) en Boston, encontrando que la criminalidad (CRIM), la contaminación (NOX) y el nivel socioeconómico (LSTAT) son los predictores más importantes, con coeficientes negativos y significativos. Mientras que el número de habitaciones (RM), la edad de las viviendas (AGE) y la calidad de la educación (PTRATIO) no muestran una influencia significativa en este modelo. El intercepto (59.06933) representa el valor estimado de una vivienda cuando todas las variables predictoras son cero, pero debe interpretarse con cautela. Se podrían realizar mejoras al modelo, como eliminar variables no significativas, verificar la multicolinealidad, explorar otras variables relevantes (distancia a empleos, áreas verdes), considerar interacciones entre variables y evaluar posibles relaciones no lineales.
 
-<<<<<<< Updated upstream
 # Ecuación del modelo
 
 $$
 \hat{y}_0 = 59.06933 -0.08634x_1 - 21.92000x_2 + 0.26285x_3 - 0.01242x_4 - 1.001242x_5 - 1.00533x_6 - 0.46531x_7 + \epsilon_i
 $$
 
-# Tabla de variabilidad del modelo (Tabla  Anova)
+# Tabla de variabilidad del modelo (Tabla Anova)
 
 ```{r}
 #| echo: false
@@ -197,3 +201,319 @@ anova(modelo)
 \end{table}
 
 ## Comentarios
+
+# Punto 4
+
+Pruebe la significancia individual de cada uno de los parámetros del modelo (excepto intercepto), usando la prueba t, y para dos cualesquiera de las predictoras, establezca claramente la prueba de hipótesis y el criterio decisión.
+
+Para realizar el test de significancia individual para cada uno de los parámetros $\beta_j$j , esto es, probar
+
+$$
+H_0 : \beta_j = 0 \ \text{vs.} \ H_1 : \beta_j \neq 0
+$$
+
+Teniendo en cuenta además que $\sigma^2$ es desconocido, mediante el siguiente estadístico de prueba con su distribución bajo $H_0$:
+
+$$
+T_0 = \frac{\hat{\beta}_j}{\sqrt{\text{MSE} \, C_{jj}}} \overset{H_0}{\sim} t_{n-k-1};
+$$
+
+```{r}
+#| echo: false
+#| label: tbl-resumen
+#| tbl-cap: Resumen del modelo
+summary(modelo)$coefficients %>% round(5) %>% pander()
+```
+
+De acuerdo con la @tbl-resumen, se observa que las variables `CRIM`, `NOX`y  `LSTAT` resultan estadísticamente significativas, dado que sus valores p son menores al nivel de significancia establecido ($\alpha = 0.05$).
+
+
+Para las variables `CRIM` y `AGE`, establezeremos la prueba de hipótesis y el criterio de
+decision.
+
+
+Para la variable `CRIM` las hipótesis son las siguientes:
+
+
+$$
+H_0 : \beta_1 = 0 \ \text{vs.} \ H_1 : \beta_1 \neq 0
+$$
+
+Para la variable `AGE` las hipótesis son las siguientes:
+
+
+$$
+H_0 : \beta_4 = 0 \ \text{vs.} \ H_1 : \beta_4 \neq 0
+$$
+
+
+Y los criterios de desición son:
+
+
+$$
+\text{Rechazo con valor P: si } P\left( \left| t_{n-k-1} \right| > \left| T_0 \right| \right) \text{ es pequeño;} \\
+\text{Rechazo con región crítica a un nivel de significancia } \alpha: \text{ si } \left| T_0 \right| > t_{\alpha/2, n-k-1}.
+$$
+
+
+
+
+
+## Punto 5
+
+Teniendo en cuenta los resultados anteriores, realice una prueba con sumas de cuadrados extras utilizando el test lineal general; especifique claramente el modelo reducido y el modelo completo, el estadístico de la prueba, su distribución, el cálculo del valor P, la decisión y la conclusión a la luz de los datos. Justifique la hipótesis que desea probar en este numeral.
+
+
+Del resultado anterior de la @tbl-resumen se considera considere el test parcial de la significancia de coeficientes asociados a las variables`RM`,`AGE` y` PTRATIO`.
+
+
+$$
+H_0 : \beta_3 = \beta_4 = \beta_5 = 0 \ \text{vs.} \ H_1 : \beta_j \neq 0,\ para\ al\ menos\  un\ j, \ con j=3,4\ y\ 5
+$$
+
+En este caso la matriz $L$ corresponde a,
+
+
+
+$$
+L = 
+\begin{bmatrix}
+0 & 0 & 0 & 1 & 0 & 0\\
+0 & 0 & 0 & 0 & 1 & 0\\
+0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+$$
+
+
+- **Modelo Completo (MF)**
+
+$$
+Y_i = \beta_0 + \beta_1 \text{CRIM}_i + \beta_2 \text{NOX}_i + \beta_3 \text{RM}_i + \beta_4 \text{AGE}_i + \beta_5 \text{PTRATIO}_i + \beta_6 \text{LSTAT}_i + E_i
+$$
+
+- **Modelo Reducido (MR)**
+
+
+$$
+Y_i = \beta_0 + \beta_1 \text{CRIM}_i + \beta_2 \text{NOX}_i + \beta_6 \text{LSTAT}_i + E_i
+$$
+
+
+
+Por tanto, $SSE(MR)$ = $SSE (X_1,X_2, X_6)$ con n − 3 grados de libertad y SSRMR) = SSR(X3,X4) con 2
+grados de libertad. Luego, por la igualdad
+
+
+
+# Punto 6
+
+Calcule las sumas de cuadrados tipo I (secuenciales) y tipo II (parciales) ¿Cuál de las variables tienen menor valor en tales sumas? ¿Qué puede significar ello?
+
+
+
+Expecificando el modelo que estamos trabajando
+
+$$
+Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i2} + \beta_3 X_{i3} + \beta_4 X_{i4} + \beta_5 X_{i5} + \beta_6 X_{i6} +  E_i, \quad 
+E_i \overset{\text{i.i.d.}}{\sim} N(0, \sigma^2)
+$$
+Utilirizaremos la funcion `anova()` para obtener la suma de cuadrados $SS1$.
+
+
+```{r}
+#| echo: false
+#| label: tbl-anova
+#| tbl-cap: sumas de cuadrados tipo I
+
+anova(modelo) %>% kable()
+```
+
+
+De la @tbl-anova podemos concluir que:
+
+- La variable `PTRATIO` tiene la menor suma de cuadrados, lo que implica que su efecto en la variable `MEDV` es muy bajo cuando se incluye después de las demás variables.Esto podría sugerir que su efecto ya está explicado por las otras variables del modelo o que no tiene relacion directamente con la variable respuesta.
+
+- Las variables `CRIM`, `NOX` y `LSTAT` son las más importantes, ya que explican una gran proporción de la varianza en `MEDV` y son altamente significativas.
+
+
+
+
+Para la $SS2$ utilirizaremos la funcion `Anova()` para obtener la suma de cuadrados
+
+
+```{r}
+#| echo: false
+#| label: tbl-anova2
+#| tbl-cap: sumas de cuadrados tipo 2
+
+Anova(modelo) %>% kable()
+```
+
+De la @tbl-anova2 podemos concluir que:
+
+Las variables CRIM, NOX y LSTAT son las variables con mayor impacto en la variabilidad de MEDV,en particular la variable LSTAT tiene la mayor contribución.
+
+- Las variables `RM`, `AGE` y `PTRATIO` tienen una baja contribución con respecto a la variable `MEDV` una vez que se controlan las otras variables, lo que sugiere que pueden no ser necesarias en el modelo.
+
+
+
+
+
+## Punto 7
+
+Construya y analice gráficos de los residuales estudentizados vs. Valores ajustados y contra las variables de regresión utilizadas. ¿Qué información proporcionan estas gráficas?
+
+
+```{r}
+#| echo: false
+#| label: fig-resi
+#| fig-cap: "Residuales Estudentizados vs Valores ajustados"
+
+
+residuales_estudentizados <- rstudent(modelo)
+
+
+valores_ajustados <- fitted(modelo)
+
+
+plot(valores_ajustados, residuales_estudentizados, 
+     xlab = "Valores Ajustados", ylab = "Residuales Estudentizados")
+abline(h = 0, col = "red")
+
+```
+
+
+La @fig-resi nos dice que:
+
+- E modelo es adecuado, ya que no hay patrones visibles (es decir, los residuales se  distribuyen aleatoriamente alrededor de cero).Esto sugiere que los errores tienen una varianza constante (homocedasticidad) y que el modelo es lineal
+
+
+- Aunque la mayoría de los puntos están cerca de la línea cero, hay algunos puntos que se encuentran bastante alejados (outliers), especialmente en la parte superior del gráfico.
+
+
+
+
+
+```{r}
+#| echo: false
+#| label: fig-resi2
+#| fig-cap: "Residuales Estudentizados vs Cada Variable"
+
+
+par(mfrow=c(2,3)) 
+
+
+plot(datos4$CRIM, residuales_estudentizados, 
+     xlab = "CRIM",ylab = "",
+     main = "Residuales vs. CRIM")
+plot(datos4$NOX, residuales_estudentizados, 
+     xlab = "NOX", ylab = "", 
+     main = "Residuales vs. NOX")
+plot(datos4$RM, residuales_estudentizados, 
+     xlab = "RM", ylab = "",
+     main = "Residuales vs. RM")
+plot(datos4$AGE, residuales_estudentizados, 
+     xlab = "AGE", ylab = "",
+     main = "Residuales vs. AGE")
+plot(datos4$PTRATIO, residuales_estudentizados, 
+     xlab = "PTRATIO", ylab = "",
+     main = "Residuales vs. PTRATIO")
+plot(datos4$LSTAT, residuales_estudentizados, 
+     xlab = "LSTAT", ylab = "",
+     main = "Residuales vs. LSTAT")
+
+```
+
+
+De la @fig-resi2 podemos decir que:
+
+
+- En la mayoría de los gráficos, los residuos se distribuyen de manera aleatoria alrededor de cero, lo que sugiere que el modelo es adecuado para estas variables. No hay patrones claros que sugieran problemas de heterocedasticidad o no linealidad.
+
+- El gráfico de la variable `PTRATIO` con respecto a los residuales presenta unos posibles outliers, lo cual se debe investigar más a fondo para ver si es un error de medición o si representa un caso especial.
+
+
+- El gráfico de variable `RM` con respectoa los residuales tiene un rango más estrecho, pero igualmente los residuales parecen distribuidos aleatoriamente.
+
+
+## Punto 8
+
+Construya una gráfica de probabilidad normal para los residuales estudentizados. ¿Existen razones para dudar de la hipótesis de normalidad sobre los errores en este modelo?
+
+
+
+```{r}
+#| echo: false
+#| label: fig-resi3
+#| fig-cap: "Gráfico Q-Q de Residuales Estudentizados"
+
+
+qqnorm(residuales_estudentizados)
+qqline(residuales_estudentizados, col = "red")
+```
+
+De la @fig-resi3 vemos que hay algunos puntos que se alejan significativamente de la línea recta (en particular en los extremos), lo cual hay posibles razonespara dudar de la normalidad de los errores.
+
+
+
+## Punto 9
+
+Diagnostique la presencia de observaciones atípicas, de balanceo y/o influenciales y concluya.
+
+
+
+
+## Punto 10
+
+Aquí tienes el texto corregido:  
+
+Suponga que se establece que hay un error de digitación en un máximo de 10 observaciones. Ajuste el modelo sin esas observaciones y presente solo la tabla de parámetros ajustados resultante. ¿Cambian notablemente las estimaciones de los parámetros, sus errores estándar y/o la significancia? ¿Qué concluye al respecto? Evalúe el gráfico de normalidad para los residuales studentizados de este ajuste. ¿Mejoró la normalidad? Concluya sobre los efectos de estas observaciones.
+
+
+```{r}
+# Identificar outliers (residuales estudentizados fuera de [-3, 3])
+outliers <- which(abs(residuales_estudentizados) > 3)
+outliers
+```
+
+```{r}
+# Calcular los valores de leverage (hat values)
+leverage <- hatvalues(modelo)
+
+# Identificar puntos con alto leverage (mayores a 2 veces el promedio)
+puntos_balanceo <- which(leverage > 2 * mean(leverage))
+print(puntos_balanceo)
+```
+
+
+```{r}
+# Calcular la distancia de Cook
+dist_cook <- cooks.distance(modelo)
+
+# Identificar puntos influyentes (con Cook’s Distance mayor a 1)
+puntos_influyentes <- which(dist_cook > 1)
+print(puntos_influyentes)
+```
+
+
+
+
+```{r}
+# Gráfico de Leverage vs Residuales Estudentizados
+plot(leverage, residuales_estudentizados, 
+     xlab = "Leverage", ylab = "Residuales Estudentizados", 
+     main = "Leverage vs Residuales Estudentizados")
+abline(h = 0, col = "red")
+
+```
+
+
+```{r}
+# Gráfico de Cook’s Distance
+plot(dist_cook, type = "h", 
+     main = "Distancia de Cook para cada Observación", 
+     ylab = "Distancia de Cook")
+abline(h = 1, col = "red")  # Línea de referencia en 1
+
+```
+
