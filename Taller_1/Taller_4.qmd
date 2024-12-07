@@ -28,6 +28,7 @@ library(magrittr)
 library(glue)
 library(pander)
 library(kableExtra)
+library(tidyverse)
 ```
 
 ## Punto 1
@@ -79,13 +80,7 @@ datos <- read.csv("Bases_de_datos/boston.csv")
 datos4 <-datos[401:500,c(1,5,6,7,11,13,14)]
 
 
-# gg2<-ggpairs(datos4,upper=list(continuous = wrap("smooth",alpha = 0.3, size=1.2,
-#                                                  method = "lm")),lower=list(continuous ="cor"))
-# for(i in 1:ncol(datos4)){
-# gg2[i,i]<-gg2[i,i]+
-# geom_histogram(breaks=hist(datos4[,i],breaks = "FD",plot=F)$breaks,colour = "tomato",fill="lightgoldenrod1")
-# }
-# gg2
+ggpairs(datos4)
 ```
 
 **Correlaciones**: MEDV tiene una fuerte correlación positiva con RM (número promedio de habitaciones por vivienda), lo que indica que las viviendas con más habitaciones tienden a tener un valor más alto. Por otro lado, MEDV tiene una fuerte correlación negativa con LSTAT (porcentaje de la población de estatus inferior), lo que sugiere que las viviendas en áreas con mayor porcentaje de población de bajos ingresos tienden a tener un valor más bajo.
@@ -323,7 +318,7 @@ Utilirizaremos la funcion `anova()` para obtener la suma de cuadrados $SS1$.
 ```{r}
 #| echo: false
 #| label: tbl-anova
-#| tbl-cap: sumas de cuadrados tipo I
+#| tbl-cap: Sumas de cuadrados tipo I
 
 anova(modelo) %>% kable()
 ```
@@ -344,7 +339,7 @@ Para la $SS2$ utilirizaremos la funcion `Anova()` para obtener la suma de cuadra
 ```{r}
 #| echo: false
 #| label: tbl-anova2
-#| tbl-cap: sumas de cuadrados tipo 2
+#| tbl-cap: Sumas de cuadrados tipo 2
 
 Anova(modelo) %>% kable()
 ```
@@ -370,7 +365,7 @@ Construya y analice gráficos de los residuales estudentizados vs. Valores ajust
 #| fig-cap: "Residuales Estudentizados vs Valores ajustados"
 
 
-residuales_estudentizados <- rstudent(modelo)
+residuales_estudentizados <- rstandard(modelo)
 
 
 valores_ajustados <- fitted(modelo)
@@ -456,64 +451,137 @@ De la @fig-resi3 vemos que hay algunos puntos que se alejan significativamente d
 
 
 
-## Punto 9
+# Punto 9
 
 Diagnostique la presencia de observaciones atípicas, de balanceo y/o influenciales y concluya.
 
 
 
 
-## Punto 10
+## Diagnóstico de observaciones atípicas
 
-Aquí tienes el texto corregido:  
-
-Suponga que se establece que hay un error de digitación en un máximo de 10 observaciones. Ajuste el modelo sin esas observaciones y presente solo la tabla de parámetros ajustados resultante. ¿Cambian notablemente las estimaciones de los parámetros, sus errores estándar y/o la significancia? ¿Qué concluye al respecto? Evalúe el gráfico de normalidad para los residuales studentizados de este ajuste. ¿Mejoró la normalidad? Concluya sobre los efectos de estas observaciones.
-
+Para las observaciones atipicas se considerada atípica si su residuo estudentizado está fuera del rango [-2, 2] o [-3, 3] dependiendo del nivel de tolerancia. Para este caso consideraremos observacion atipicas si esta fuera del rango de [-3, 3].
 
 ```{r}
-# Identificar outliers (residuales estudentizados fuera de [-3, 3])
 outliers <- which(abs(residuales_estudentizados) > 3)
 outliers
 ```
 
+En este caso, las observaciones 8, 10, 13, 408, 410 y 413 cumplen con este criterio, por tanto son posibles outliers.
+
+
+## Diagnóstico de observaciones de balanceo
+
+
+Primeramente calculamos los valores de leverage (diagonales de la matriz $H$), también llamada matriz de proyección).Las observaciones con $h_{ii}$ grandes y residuales $r_i$ también grandes probablemente serán influenciales.
+
+La observación $i$ es un punto de balanceo si $hii > 2(k + 1)/n$, pero si $2(k + 1)/n > 1$, este criterio no funciona pues los $h_{ii}$ siempre son menores que 1.
+
 ```{r}
-# Calcular los valores de leverage (hat values)
+# Calcular valores de leverage
 leverage <- hatvalues(modelo)
 
-# Identificar puntos con alto leverage (mayores a 2 veces el promedio)
-puntos_balanceo <- which(leverage > 2 * mean(leverage))
-print(puntos_balanceo)
+# Umbral para leverage alto
+umbral_leverage <- 2 * ((length(coef(modelo)) + 1) / nrow(datos))
+
+# Identificar observaciones con leverage alto
+balanceo <- which(leverage > umbral_leverage)
+print(balanceo)
+
 ```
+
+
+Las observaciones 406, 407, 411, 415, 419, 494, 495, 496, 6, 7, 11, 15, 19, 95 y 96 tienen valores de leverage altos, es decir, estos puntos tienen una influencia considerable en el ajuste del modelo debido a su posición en el espacio de las variables predictoras.
+
+
+## Diagnóstico de observaciones influenciales
+
+Para este diagnostico utlizaremos la distacia de Cook lo uqe hace es medir la influencia de la observación $i$ sobretodos los valores ajustados de la respuesta, para $i = 1, 2, . . . , n$.Una observación es influyente si su distancia de Cook supera el umbral de $4/n.$
 
 
 ```{r}
 # Calcular la distancia de Cook
-dist_cook <- cooks.distance(modelo)
+cook <- cooks.distance(modelo)
 
-# Identificar puntos influyentes (con Cook’s Distance mayor a 1)
-puntos_influyentes <- which(dist_cook > 1)
-print(puntos_influyentes)
+# Umbral de influencia
+umbral_cook <- 4 / nrow(datos4)
+
+# Identificar observaciones influyentes
+influenciales <- which(cook > umbral_cook)
+influenciales
 ```
+
+
+Estas observaciones tienen un impacto considerable en el modelo. Se debe investigar para decidir si se deben eliminar, ajustar, o conservar, dependiendo de si representan errores o datos extremos válidos. Si representan errores o casos extremos no representativos de la población general, podrían excluirse para mejorar la precisión del modelo. Sin embargo, si son casos válidos, es importante reconocer su impacto y considerar métodos robustos que puedan reducir su influencia sin eliminarlas.
+
+
+
+```{r}
+# Gráfico de leverage vs. distancia de Cook
+plot(cook, leverage, main = "Influencia y leverage", 
+     xlab = "Distancia de Cook", ylab = "Leverage", pch = 20)
+abline(h = umbral_leverage, col = "red", lty = 2)  # Umbral de leverage
+abline(v = umbral_cook, col = "blue", lty = 2)    # Umbral de Cook
+
+```
+
+
+
+# Punto 10 
+
+Suponga que se establece que hay un error de digitación en un máximo de 10 observaciones. Ajuste el modelo sin esas observaciones y presente solo la tabla de parámetros ajustados resultante. ¿Cambian notablemente las estimaciones de los parámetros, sus errores estándar y/o la significancia? ¿Qué concluye al respecto? Evalúe el gráfico de normalidad para los residuales studentizados de este ajuste. ¿Mejoró la normalidad? Concluya sobre los efectos de estas observaciones.
+
+
+
+Supongamos que tenemos 10 observaciones que se consideran como errores de digitación, son las 10 ultimas filas.
+
+```{r}
+# se eliminaron las 10 ultimas observacione
+datos_limpios <- datos4[-c(91:100), ]
+```
+
+```{r}
+# Ajustar el modelo sin las observaciones problemáticas
+modelo_ajustado <- lm(MEDV ~., data = datos_limpios)
+```
+
+
+```{r}
+#| echo: false
+#| label: tbl-resu_nuevo
+#| tbl-cap: Resumen del Nuevo Ajuste del Modelo
+
+
+summary(modelo_ajustado)$coefficients %>% round(5) %>% kable(align = 'lcccc')
+```
+
+
+De la @tbl-resu_nuevo notamos que si hubo cambios notables las estimaciones de los parámetros en sus errores estándar algunas variables no sufrieron cambios notables , pero otras si como es el caso de la variable `PTRATIO` y con respecto a la significancia la variable que sufrio cambios en su significancia fue `PTRATIO`.
 
 
 
 
 ```{r}
-# Gráfico de Leverage vs Residuales Estudentizados
-plot(leverage, residuales_estudentizados, 
-     xlab = "Leverage", ylab = "Residuales Estudentizados", 
-     main = "Leverage vs Residuales Estudentizados")
-abline(h = 0, col = "red")
-
+residuales_estudentizados_ajustado <- rstudent(modelo_ajustado)
 ```
 
 
 ```{r}
-# Gráfico de Cook’s Distance
-plot(dist_cook, type = "h", 
-     main = "Distancia de Cook para cada Observación", 
-     ylab = "Distancia de Cook")
-abline(h = 1, col = "red")  # Línea de referencia en 1
+#| echo: false
+#| label: fig-resi_nuevo
+#| fig-cap: "Gráfico Q-Q de Residuales Estudentizados Nuevo Ajuste"
 
+qqnorm(residuales_estudentizados_ajustado)
+qqline(residuales_estudentizados_ajustado, col = "red")
 ```
+
+De la @fig-resi_nuevo vemos que hay algunos puntos que se alejan significativamente de la línea recta (en particular en los extremos), lo cual hay posibles razones para dudar de la normalidad de los errores, por tanto no mejoro la normalidad.
+
+
+
+
+
+
+
+Podemos concluir que, en este caso, las observaciones problemáticas no tuvieron una influencia significativa en los resultados del modelo, ya que las estimaciones de los parámetros , sus errores estándar sufrieron cambios pero no tan notables excepto en una variable y l a significancia estadísticapermanecieron prácticamente inalterados tras su eliminación. Esto  nos sugiere que el modelo es robusto frente a dichas observaciones.
 
