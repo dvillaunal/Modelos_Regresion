@@ -181,21 +181,43 @@ anova(modelo)
 
 \begin{table}[ht]
 \centering
-\caption{Resultados de las pruebas estadísticas}
-\begin{tabular}{|c|c|c|c|c|c|}
+\begin{tabular}{lrrrrr}
   \hline
-  & \textbf{Df} & \textbf{Sum Sq} & \textbf{Mean Sq} & \textbf{F value} & \textbf{Pr($>$F)} \\ 
+ & Df & Sum Sq & Mean Sq & F value & Pr($>$F) \\ 
   \hline
-  \textbf{Prueba1} & 1 & 0.13 & 0.13 & 0.00 & 0.9628 \\ 
-  \textbf{Prueba2} & 1 & 1739.90 & 1739.90 & 31.08 & 0.0001 \\ 
-  \textbf{Prueba3} & 1 & 4138.43 & 4138.43 & 73.92 & 0.0000 \\ 
-  \textbf{Prueba4} & 1 & 608.37 & 608.37 & 10.87 & 0.0049 \\ 
-  \textbf{Residuals} & 15 & 839.72 & 55.98 &  &  \\ 
+CRIM & 1 & 583.85 & 583.85 & 48.91 & 0.0000 \\ 
+  NOX & 1 & 490.82 & 490.82 & 41.12 & 0.0000 \\ 
+  RM & 1 & 112.76 & 112.76 & 9.45 & 0.0028 \\ 
+  AGE & 1 & 116.39 & 116.39 & 9.75 & 0.0024 \\ 
+  PTRATIO & 1 & 2.48 & 2.48 & 0.21 & 0.6493 \\ 
+  LSTAT & 1 & 383.57 & 383.57 & 32.13 & 0.0000 \\ 
+  Residuals & 93 & 1110.13 & 11.94 &  &  \\ 
    \hline
 \end{tabular}
 \end{table}
 
-## Comentarios
+## **2. Significancia del modelo**
+Para determinar si el modelo es significativo, se observa el valor global de $F$ y su p-valor asociado. El modelo tiene un valor $F$ elevado (verificado en la salida de Anova) y un p-valor menor a 0.05, lo que indica que el modelo es globalmente significativo y al menos una de las variables predictoras tiene una relación significativa con $MEDV$.
+
+## **3. Proporción de variabilidad explicada**
+El coeficiente de determinación ($R^2$) indica la proporción de la variabilidad total de la respuesta que es explicada por el modelo. En este caso:
+
+$$
+R^2 = 1 - \frac{\text{Suma de cuadrados residuales}}{\text{Suma total de cuadrados}}
+$$
+
+Con base en la tabla Anova:
+- Suma de cuadrados residuales ($SS_{Residuals}$): 1110.13.
+- Suma total de cuadrados ($SS_{Total}$): $1110.13 + (583.85 + 490.82 + 112.76 + 116.39 + 2.48 + 383.57) = 2800.00$.
+
+$$
+R^2 = 1 - \frac{1110.13}{2800.00} = 0.6035
+$$
+
+Por lo tanto, el modelo explica aproximadamente el **60.35%** de la variabilidad total de $MEDV$.
+
+## **4. Opinión sobre $R^2$**
+Un valor de $R^2$ del 60.35% sugiere que el modelo posee un nivel de poder explicativo moderado. Aunque no logra explicar toda la variabilidad de $MEDV$, esta situación es comprensible dado que el fenómeno en cuestión está afectado por diversos factores, algunos de los cuales podrían no estar considerados en este análisis. Se podría optimizar el modelo mediante la inclusión de variables adicionales pertinentes, la exploración de posibles relaciones no lineales, o la aplicación de técnicas más sofisticadas como la regularización (LASSO, Ridge) para mejorar la selección de variables.
 
 # Punto 4
 
@@ -246,11 +268,13 @@ Y los criterios de desición son:
 
 
 $$
-\text{Rechazo con valor P: si } P\left( \left| t_{n-k-1} \right| > \left| T_0 \right| \right) \text{ es pequeño;} \\
-\text{Rechazo con región crítica a un nivel de significancia } \alpha: \text{ si } \left| T_0 \right| > t_{\alpha/2, n-k-1}.
+\text{Rechazo con valor P: si } P\left( \left| t_{n-k-1} \right| > \left| T_0 \right| \right) \text{ es pequeño;}
 $$
 
-
+$$
+\text{Rechazo con región crítica a} \\
+\text{un nivel de significancia} \ \alpha: \text{ si } \left| T_0 \right| > t_{\alpha/2, n-k-1}
+$$
 
 
 
@@ -282,6 +306,13 @@ $$
 
 - **Modelo Completo (MF)**
 
+```{r}
+# Crear el modelo completo
+modelo_completo <- lm(MEDV ~ CRIM + NOX + RM +
+                        AGE + PTRATIO + LSTAT, data = datos4)
+```
+
+
 $$
 Y_i = \beta_0 + \beta_1 \text{CRIM}_i + \beta_2 \text{NOX}_i + \beta_3 \text{RM}_i + \beta_4 \text{AGE}_i + \beta_5 \text{PTRATIO}_i + \beta_6 \text{LSTAT}_i + E_i
 $$
@@ -289,16 +320,80 @@ $$
 - **Modelo Reducido (MR)**
 
 
+```{r}
+# Crear el modelo reducido
+modelo_reducido <- lm(MEDV ~ CRIM + NOX + LSTAT, data = datos4)
+```
+
+
 $$
 Y_i = \beta_0 + \beta_1 \text{CRIM}_i + \beta_2 \text{NOX}_i + \beta_6 \text{LSTAT}_i + E_i
 $$
 
+```{r}
+# Realizar prueba de sumas de cuadrados adicionales
+anova_result <- anova(modelo_reducido, modelo_completo)
+
+# Visualizar los resultados
+print(anova_result)
+```
 
 
-Por tanto, $SSE(MR)$ = $SSE (X_1,X_2, X_6)$ con n − 3 grados de libertad y SSRMR) = SSR(X3,X4) con 2
-grados de libertad. Luego, por la igualdad
+Por tanto, $SSR(MR) = SSR(X_3, X_4, X_5|X_1, X_2, X_6)$ con $k = 6-3 = 3$ grados de libertad.
 
 
+```{r}
+# Calcular el estadístico F manualmente (opcional, usando los residuos)
+# Suma de cuadrados error modelo reducido
+SSE_MR <- sum(residuals(modelo_reducido)^2)
+# Suma de cuadrados error modelo completo
+SSE_MF <- sum(residuals(modelo_completo)^2)
+```
+
+Se utiliza el siguiente estadístico:
+
+$$
+F_{o,3-4-5} = \frac{SSR(X_3, X_4, X_5|X_1, X_2, X_6)}{MSE(X_1, X_2, X_3, X_4, X_5, X_6)} \sim f_{3,96}
+$$
+
+```{r}
+# Grados de libertad
+n <- nrow(datos4)  # Número de observaciones
+q <- 3  # Número de coeficientes restringidos
+p <- length(coef(modelo_completo))  # Número de coeficientes modelo completo
+df_error <- n - p  # Grados de libertad residuales modelo completo
+
+# Cálculo estadístico F
+F_o <- ((SSE_MR - SSE_MF) / q) / (SSE_MF / df_error)
+
+# Valor P asociado
+valor_p <- pf(F_o, df1 = q, df2 = df_error, lower.tail = FALSE)
+```
+
+
+con una región de rechazo (calculo del valor-p) donde:
+
+$$
+f{3,96} > F_{o,3-4-5}
+$$
+
+```{r}
+#| echo: false
+# Imprimir resultados
+cat("Estadístico F:", F_o, "\n")
+cat("Valor p:", valor_p, "\n")
+
+# Decisión
+if (valor_p < 0.05) {
+  cat("Rechazamos H0: Al menos una de las variables (RM, AGE, PTRATIO) es significativa.\n")
+} else {
+  cat("No rechazamos H0: Las variables (RM, AGE, PTRATIO) no son significativas en conjunto.\n")
+}
+```
+
+Con base en los resultados de la prueba de hipótesis, el estadístico $F$ calculado es $0.2835$ y el valor $P$ asociado es $0.8372$. Dado que el valor $P$ es considerablemente mayor al nivel de significancia comúnmente utilizado ($\alpha = 0.05$), no se rechaza la hipótesis nula ($H_0$). Esto indica que, en conjunto, las variables $\text{RM}$, $\text{AGE}$ y $\text{PTRATIO}$ no aportan significativamente a la explicación de la variable dependiente, después de considerar las demás variables en el modelo ($\text{CRIM}$, $\text{NOX}$, y $\text{LSTAT}$). 
+
+En consecuencia, estas tres variables podrían ser excluidas del modelo sin perder sustancialmente la capacidad explicativa del mismo.
 
 # Punto 6
 
@@ -482,7 +577,7 @@ La observación $i$ es un punto de balanceo si $hii > 2(k + 1)/n$, pero si $2(k 
 leverage <- hatvalues(modelo)
 
 # Umbral para leverage alto
-umbral_leverage <- 2 * ((length(coef(modelo)) + 1) / nrow(datos))
+umbral_leverage <- 2 * ((length(coef(modelo)) + 1) / nrow(datos4))
 
 # Identificar observaciones con leverage alto
 balanceo <- which(leverage > umbral_leverage)
