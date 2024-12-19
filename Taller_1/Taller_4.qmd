@@ -1,11 +1,4 @@
 ---
-subtitle: "Departamento de Estadística - UNALMED"
-title: "Taller RML (Parte 1) - Grupo 4"
-lang: es
-author: 
-  - Luis David Hernandez Peréz
-  - Daniel Felipe villa Rengifo
-  - Juan Gabriel Carvajal Negrete
 format: pdf
 execute: 
   fig-align: center 
@@ -30,6 +23,52 @@ library(pander)
 library(kableExtra)
 library(tidyverse)
 ```
+
+
+
+\begin{titlepage}
+	\begin{center}
+		{\LARGE \textbf{Universidad Nacional De Colombia}} \\
+		
+		\vspace{4mm}
+		
+		{\Large \textbf{Sede Medellín}}
+		\vspace{0.3cm}
+		\begin{figure}[h]
+			\centering
+		\includegraphics[height=5cm]{logo.jpg}
+		\end{figure}
+	
+	\vspace{1mm}
+	
+	{\LARGE \textbf{Facultad de Ciencias}}
+	\vspace{5mm}
+	
+    {\Large Departamento de Estadística}
+	\vspace{1.4cm}
+
+    {\LARGE\textbf{Taller RML (Parte 1) - Grupo 4}}
+    \vspace{1.4cm}    
+    
+    {\Large \textbf{Daniel Felipe Villa Rengifo}}
+    \vspace{4mm}
+    
+    {\Large \textbf{Luis David Hernández Pérez}}
+    \vspace{4mm}
+    
+    {\Large \textbf{Juan Gabriel Carvajal Negrete}}
+    \vspace{1.4cm}
+	
+    {\Large Modelos de Regresión}
+	\vspace{1cm}
+    
+    {\Large\textbf{Diciembre, 2024}}
+
+	\end{center}
+\end{titlepage}
+
+
+
 
 ## Punto 1
 
@@ -91,6 +130,7 @@ ggpairs(datos4)
 #| fig-cap: Distribución de la variable respuesta `MEDV` 
 #| message: false
 #| warning: false
+#| echo: false
 
 
 datos4 %>% ggplot(aes(x=MEDV))+
@@ -102,12 +142,14 @@ datos4 %>% ggplot(aes(x=MEDV))+
 
 Vemos que los valores de la variable `MEDV` se distribuyen no normales y en su mayoría agrupados por lo cual podríamos decir que no hay presencia de datos atípicos.
 
-\newpage
+
 
 # Prueba de normalidad
 
 ```{r}
 #| output-location: slide
+#| echo: false
+
 shapiro.test(datos4$MEDV)
 ```
 
@@ -334,8 +376,7 @@ $$
 # Realizar prueba de sumas de cuadrados adicionales
 anova_result <- anova(modelo_reducido, modelo_completo)
 
-# Visualizar los resultados
-print(anova_result)
+anova_result
 ```
 
 
@@ -453,6 +494,7 @@ Las variables CRIM, NOX y LSTAT son las variables con mayor impacto en la variab
 
 Construya y analice gráficos de los residuales estudentizados vs. Valores ajustados y contra las variables de regresión utilizadas. ¿Qué información proporcionan estas gráficas?
 
+\newpage
 
 ```{r}
 #| echo: false
@@ -481,7 +523,7 @@ La @fig-resi nos dice que:
 - Aunque la mayoría de los puntos están cerca de la línea cero, hay algunos puntos que se encuentran bastante alejados (outliers), especialmente en la parte superior del gráfico.
 
 
-
+\newpage
 
 
 ```{r}
@@ -530,6 +572,8 @@ De la @fig-resi2 podemos decir que:
 
 Construya una gráfica de probabilidad normal para los residuales estudentizados. ¿Existen razones para dudar de la hipótesis de normalidad sobre los errores en este modelo?
 
+
+\newpage
 
 
 ```{r}
@@ -610,18 +654,6 @@ influenciales
 Estas observaciones tienen un impacto considerable en el modelo. Se debe investigar para decidir si se deben eliminar, ajustar, o conservar, dependiendo de si representan errores o datos extremos válidos. Si representan errores o casos extremos no representativos de la población general, podrían excluirse para mejorar la precisión del modelo. Sin embargo, si son casos válidos, es importante reconocer su impacto y considerar métodos robustos que puedan reducir su influencia sin eliminarlas.
 
 
-
-```{r}
-# Gráfico de leverage vs. distancia de Cook
-plot(cook, leverage, main = "Influencia y leverage", 
-     xlab = "Distancia de Cook", ylab = "Leverage", pch = 20)
-abline(h = umbral_leverage, col = "red", lty = 2)  # Umbral de leverage
-abline(v = umbral_cook, col = "blue", lty = 2)    # Umbral de Cook
-
-```
-
-
-
 # Punto 10 
 
 Suponga que se establece que hay un error de digitación en un máximo de 10 observaciones. Ajuste el modelo sin esas observaciones y presente solo la tabla de parámetros ajustados resultante. ¿Cambian notablemente las estimaciones de los parámetros, sus errores estándar y/o la significancia? ¿Qué concluye al respecto? Evalúe el gráfico de normalidad para los residuales studentizados de este ajuste. ¿Mejoró la normalidad? Concluya sobre los efectos de estas observaciones.
@@ -634,6 +666,8 @@ Supongamos que tenemos 10 observaciones que se consideran como errores de digita
 # se eliminaron las 10 ultimas observacione
 datos_limpios <- datos4[-c(91:100), ]
 ```
+
+\newpage
 
 ```{r}
 # Ajustar el modelo sin las observaciones problemáticas
@@ -655,17 +689,14 @@ De la @tbl-resu_nuevo notamos que si hubo cambios notables las estimaciones de l
 
 
 
-
-```{r}
-residuales_estudentizados_ajustado <- rstudent(modelo_ajustado)
-```
+\newpage
 
 
 ```{r}
 #| echo: false
 #| label: fig-resi_nuevo
 #| fig-cap: "Gráfico Q-Q de Residuales Estudentizados Nuevo Ajuste"
-
+residuales_estudentizados_ajustado <- rstudent(modelo_ajustado)
 qqnorm(residuales_estudentizados_ajustado)
 qqline(residuales_estudentizados_ajustado, col = "red")
 ```
