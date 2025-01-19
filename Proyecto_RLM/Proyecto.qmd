@@ -1,0 +1,618 @@
+---
+lang: es
+format: pdf
+highlight-style: tango
+
+editor: source
+
+execute:
+  cache: True
+  warning: False
+---
+
+```{r}
+#| message: false
+#| echo: false
+
+library(tidyverse)
+library(magrittr)
+library(janitor)
+library(skimr)
+library(DataExplorer)
+library(GGally)
+library(reticulate)
+library(stringr)
+library(gridExtra)
+library(xtable)
+library(kableExtra)
+library(knitr)
+library(corrplot)
+library(pander)
+```
+
+
+
+\begin{titlepage}
+	\begin{center}
+		{\LARGE \textbf{Universidad Nacional De Colombia}} \\
+		
+		\vspace{4mm}
+		
+		{\Large \textbf{Sede Medellín}}
+		\vspace{0.3cm}
+		\begin{figure}[h]
+			\centering
+		\includegraphics[height=5cm]{logo.jpg}
+		\end{figure}
+	
+	\vspace{1mm}
+	
+	{\LARGE \textbf{Facultad de Ciencias}}
+	\vspace{5mm}
+	
+    {\Large Departamento de Estadística}
+	\vspace{1.4cm}
+
+    {\LARGE\textbf{Proyecto - 1 Entrega}}
+    \vspace{1.4cm}    
+    
+    {\Large \textbf{Daniel Felipe Villa Rengifo}}
+    \vspace{4mm}
+    
+    {\Large \textbf{Luis David Hernández Pérez}}
+    \vspace{4mm}
+    
+    {\Large \textbf{Juan Gabriel Carvajal Negrete}}
+    \vspace{1.4cm}
+	
+    {\Large Modelos de Regresión}
+	\vspace{1cm}
+    
+    {\Large\textbf{Diciembre, 2024}}
+
+	\end{center}
+\end{titlepage}
+
+
+
+
+# Contexto de los datos
+
+## Planteamiento de Problema
+
+Una empresa automotriz china, Geely Auto, tiene la intención de ingresar al mercado de Estados Unidos estableciendo una planta de fabricación allí y produciendo vehículos localmente para competir con sus contrapartes estadounidenses y europeas.
+
+Para ello, han contratado una consultora automotriz para comprender los factores que influyen en la fijación de precios de los vehículos. Específicamente, desean entender los factores que afectan el precio de los autos en el mercado estadounidense, ya que estos pueden ser muy diferentes a los del mercado chino. La empresa desea conocer:
+
+-   Qué variables son significativas para predecir el precio de un automóvil.
+-   Qué tan bien estas variables describen el precio de un automóvil.
+
+A partir de diversas encuestas de mercado, la consultora ha recopilado un conjunto de datos <https://www.kaggle.com/datasets/hellbuoy/car-price-prediction/data> sobre diferentes tipos de vehículos en el mercado estadounidense.
+
+## Objetivo Empresarial
+
+Se requiere modelar el precio de los automóviles utilizando las variables independientes disponibles. Este modelo será utilizado por la gerencia para comprender cómo varían exactamente los precios en función de las variables independientes. De esta manera, podrán ajustar el diseño de los vehículos, la estrategia empresarial, entre otros, para alcanzar ciertos niveles de precio. Además, el modelo será una herramienta útil para que la gerencia entienda la dinámica de precios de un nuevo mercado.
+
+## Descripcion de las variables
+
+- `Car_ID`: ID único de cada observación (entero).
+- `Symboling`: Clasificación del riesgo de seguro; un valor de +3 indica que el automóvil tiene alto riesgo y un valor de -3 indica que probablemente es seguro (categórico).
+-   `fueltype`: Tipo de combustible del automóvil, por ejemplo, gasolina o diésel (categórico).
+-   `aspiration`: Tipo de aspiración utilizado en el automóvil (categórico).
+-   `doornumber`: Número de puertas del automóvil (categórico).
+-   `carbody`: Tipo de carrocería del automóvil (categórico).
+-   `drivewheel`: Tipo de tracción (ruedas motrices) del automóvil (categórico).
+-   `enginelocation`: Ubicación del motor del automóvil (categórico).
+-   `wheelbase`: Distancia entre los ejes del automóvil (numérico).
+-   `carlength`: Longitud del automóvil (numérico).
+-   `carwidth`: Ancho del automóvil (numérico).
+-   `carheight`: Altura del automóvil (numérico).
+-   `curbweight`: Peso del automóvil sin ocupantes ni equipaje (numérico).
+-   `enginetype`: Tipo de motor del automóvil (categórico).
+-   `cylindernumber`: Número de cilindros del motor (categórico).
+-   `enginesize`: Tamaño del motor del automóvil (numérico).
+-   `fuelsystem`: Sistema de combustible del automóvil (categórico).
+-   `boreratio`: Relación de diámetro del cilindro (numérico).
+-   `stroke`: Carrera o volumen dentro del motor (numérico).
+-   `compressionratio`: Relación de compresión del motor (numérico).
+-   `horsepower`: Potencia del motor en caballos de fuerza (numérico).
+-   `peakrpm`: Revoluciones máximas por minuto (RPM) del motor (numérico).
+-   `citympg`: Rendimiento de combustible en ciudad, medido en millas por galón (numérico).
+-   `highwaympg`: Rendimiento de combustible en carretera, medido en millas por galón (numérico).
+-   `price`: Precio del automóvil, considerado como la variable dependiente (numérico).
+
+```{r}
+#| echo: false
+datos <- read.csv("CarPrice_Assignment.csv") #carga de los datos
+datos %<>% clean_names() # limpieza de los nombres de las variables
+```
+
+
+El conjunto de datos está formado por 205 registros y 26 variables, sin valores ausentes en las variables.
+
+
+# Limpieza de los datos
+
+En la variable `car_name` podemos observar que los valores almacenan tanto el nombre de la empresa como el nombre del coche por lo cual hay 147 categorias distintas. Por tanto limpiaremos esa variable separarando los nombres de las empresas de carros de la variable `car_name`. Por lo tanto crearemos una variable llamada `company_name` la cual tendra solo el nombre de la empresa o compañia a la cual pertenece el carro.
+
+
+```{r}
+#| echo: false
+#| results: hide
+
+# Extrayendo la primera palabra de 'CarName'
+datos$company_name <- sapply(strsplit(as.character(datos$car_name), " "), `[`, 1)
+
+datos$company_name %>% unique()
+```
+Vemos que hay algunas categorías de la variable `company_name` estan mal escritas como:
+
+- maxda = mazda
+- Nissan = nissan
+- porsche = porcshce
+- toyota = toyouta
+- vokswagen = volkswagen = vw
+
+Reemplazaremos los nombres incorrectos con el nombre correcto de la empresa.
+
+
+```{r}
+#| echo: false
+#| results: hide
+       
+datos$company_name <- str_replace(datos$company_name, 'maxda', 'mazda')
+datos$company_name <- str_replace(datos$company_name, 'porcshce', 'porsche')
+datos$company_name <- str_replace(datos$company_name, 'toyouta', 'toyota')
+datos$company_name <- str_replace(datos$company_name, 'vokswagen', 'volkswagen')
+datos$company_name <- str_replace(datos$company_name, 'vw', 'volkswagen')
+datos$company_name <- str_replace(datos$company_name, 'Nissan', 'nissan')
+```
+
+
+
+
+
+
+# Análisis descriptivo de los datos.
+
+Para el análisis exploratorio de datos, y dado el gran número de variables disponibles, se seleccionarán aquellas que, según la investigación previa, podrían ser relevantes para explicar el comportamiento del precio. En este análisis se evaluará la correlación entre las variables numéricas, así como su relación con la variable precio. Para las variables categóricas, se analizará su interacción con el precio, buscando patrones o asociaciones significativas, por tanto las variables que probablemente sean más importantes para predecir el precio de un automóvil:
+
+
+- **Dimensiones del vehículo**: Las variables `wheelbase`, `carlength`, `carwidth`, y `carheight` podrían estar correlacionados con el precio porque un automóvil más grande o más espacioso tiende a ser más caro.
+
+- **Especificaciones del motor**: Variables como `enginesize`, `horsepower`, y `compressionratio` están directamente relacionados con el rendimiento del automóvil y podrían influir significativamente en el precio.
+
+- **Peso**: La variable `curbweight` puede ser un buen indicador del tipo y tamaño del vehículo, y suele correlacionarse con el precio.
+
+- **Eficiencia de combustible**: Las variables `citympg` y `highwaympg` podrían influir en el precio, ya que los automóviles más eficientes suelen tener precios diferentes según el segmento de mercado.
+
+
+La variables categóricas como `carbody`, `drivewheel`, `fueltype`,`enginetype` y `company_name` suelen ser indicadores del tipo de vehículo y su mercado objetivo.
+
+
+
+
+
+## Variable respuesta
+
+
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-precio
+#| fig-cap: "Distribución de la variable respuesta (Precio)"
+#| fig-subcap: 
+#|   - "Histograma"
+#|   - "Boxplot"
+
+
+# Grafico del Histograma
+ggplot(datos, aes(x = price)) +
+  geom_histogram(aes(y = ..density..), 
+                 bins = 20, 
+                 fill = "steelblue", 
+                 alpha = 0.5, 
+                 color = "black") +
+  geom_density(color = "blue", size = 1) +
+  labs(
+    x = "Precio",
+    y = "Densidad"
+  ) +
+  theme_minimal()
+
+
+
+# Grafico de Boxplot
+
+ggplot(datos, aes(y = price)) +
+  geom_boxplot(
+    fill = "#458B74",      
+    color = "black",    
+    outlier.color = "black",
+    outlier.size = 2    
+  ) +
+
+  labs(
+    y = "Precio",
+    x = NULL
+  ) +
+  theme_minimal()
+```
+
+
+
+
+
+
+<!-- Mejorar esta redaccion -->
+
+De la @fig-precio podemos decir que los precios de los carros tienen una distribución asimétrica, concentrándose en valores bajos, pero con una minoría de carros significativamente más caros, ademas el precio de la mayoría de los carros está por debajo de 14000. Existe una diferencia significativa entre el valor medio y la mediana y los valores atípicos en el rango superior deben considerarse, ya que pueden representar carros de lujo o especiales por tanto análizaremos ahora la variable que corresponde al nombre de la empresa o compañia a la cual pertenece el carro para ver que relación existe con el precio.
+
+
+
+
+```{r}
+#| echo: false
+
+# Seleccionamos solo variables numéricas
+data_numeric <- datos %>% 
+  select(wheelbase, carlength, carwidth, carheight, enginesize, horsepower,
+         curbweight, compressionratio,price)
+```
+
+
+
+
+
+
+
+```{r}
+#| echo: false
+#| label: fig-corr
+#| fig-cap: "Grafico de Correlación"
+
+corr <- cor(data_numeric, method = "pearson")
+
+corrplot(corr,
+         method = "circle",            
+         type = "upper",               
+         tl.col = "black",             
+         tl.srt = 45,                  
+         number.cex = 0.7,             
+         addCoef.col = "black",        
+         col = colorRampPalette(c("red", "white", "blue"))(200),
+         diag = FALSE)
+```
+
+
+
+
+De la @fig-corr se pueden extraer las siguientes conclusiones:
+
+-   Las variables que tienen una mayor relacion lineal con el precio son : `enginesize` ($r=0.87$), `curbweight` ($r = 0.84$) , `horsepower` ($r = 0.81$) y `carwidth` ($r= 0.76$).
+
+-   Hay pares de variables que tienen correlacion alta por lo que posiblemente no sea útil introducir algunas pares de variables en el modelo.
+
+
+
+
+
+
+```{r}
+#| echo: false
+#| label: fig-empresa
+#| fig-cap: "Distribución de los nombre de la empresa"
+
+
+datos %>% count(company_name) %>% 
+  ggplot(aes(x=reorder(factor(company_name), n, decreasing = TRUE), 
+             y = n,fill = company_name)) + 
+  geom_bar(stat = "identity") +
+  labs(
+    x = "Nombre de la empresa",
+    y = "Frecuencia"
+  )+
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1), 
+    legend.position = "none")
+```
+
+
+
+\newpage
+
+De la @fig-empresa, observamos que la mayoria de los carros en este conjunto de datos está dominado por unas pocas marcas, especialmente Toyota, que supera ampliamente a las demás,por lo tanto, podemos decir que Toyota es la empresa preferida de los clientes.
+
+
+\newpage
+
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-empresa2
+#| fig-cap: "Distribución del Precio vs Nombre de la empresa"
+#| fig-subcap: 
+#|   - "Gráfico Boxplot"
+#|   - "Gráfico de Barras"
+
+
+datos %>% ggplot(aes(x = company_name, y=price, fill = company_name))+
+  geom_boxplot()+
+  theme_minimal()+
+    labs(title = "Boxplot Precio vs Nombre de la empresa",
+    x = "Nombre de la empresa",
+    y = "Precio")+
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+datos %>% group_by(company_name) %>% 
+  summarise(mean_price = mean(price))%>% 
+  ggplot(aes(x = reorder(company_name, mean_price, decreasing = TRUE), 
+             y=mean_price, fill = company_name))+
+  geom_bar(stat = "identity")+
+  theme_minimal()+
+  labs(title = "Precio promedio vs Nombre de la empresa",
+    x = "Nombre de la empresa",
+    y = "Precio Promedio")+
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+
+
+A partir de la @fig-empresa2 , observamos una diferencia significativa en el precio de los carros según la empresa a la que pertenecen. **Jaguar** y **Buick** parecen ofrecer los carros con las gamas de precios más altas.
+
+
+
+
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-disp
+#| fig-cap: "Gráficos de dispersión"
+#| fig-subcap: 
+#|   - "Price vs wheelbase"
+#|   - "Price vs carlength"
+
+
+datos %>% ggplot(aes(x = carlength, y = price)) +
+      geom_point(color = "red", alpha = 0.6) +
+    labs(y = "Precio",
+       x = "Longitud del carro")+
+      theme_minimal()
+
+datos %>% ggplot(aes(x = carwidth, y = price)) +
+      geom_point(color = "red", alpha = 0.6) +
+      labs(y = "Precio",
+       x = "Ancho del carro")+
+      theme_minimal()
+```
+
+
+
+De la @fig-disp se observa claramente que la longitud y la anchura del carro están estrechamente relacionadas con su precio.A medida que aumentan la longitud y la anchura del carro, también tiende a aumentar su precio.Sin embargo, no es posible hacer inferencias claras basadas únicamente en la relación entre la longitud y el precio, debido a la alta dispersión de los datos.La altura del carro no parece tener un impacto significativo en el precio.
+
+\newpage
+
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-disp2
+#| fig-cap: "Gráficos de dispersión"
+#| fig-subcap: 
+#|   - "Price vs citymgp"
+#|   - "Price vs highwaympg"
+
+
+datos %>% ggplot(aes(x = citympg, y = price)) +
+      geom_point(color = "red", alpha = 0.6) +
+    labs(y = "Precio",
+       x = "Rendimiento de combustible en ciudad")+
+      theme_minimal()
+
+datos %>% ggplot(aes(x = highwaympg, y = price)) +
+      geom_point(color = "red", alpha = 0.6) +
+      labs(y = "Precio",
+       x = "Rendimiento de combustible en carretera")+
+      theme_minimal()
+```
+
+
+
+De la @fig-disp2 se observa claramente que `citympg` y `highwaympg` tienen una correlación negativa con el precio del carro. A medida que aumentan los valores de `citympg` y `highwaympg`, el precio del carro tiende a disminuir. Dado que ambas características están relacionadas con el precio de manera significativa, `citympg` y `highwaympg` son características útiles para predecir el precio de los carros. 
+
+
+
+
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-disp3
+#| fig-cap: "Gráficos de dispersión"
+#| fig-subcap: 
+#|   - "Price vs wheelbase"
+#|   - "Price vs curbweight"
+
+
+datos %>% ggplot(aes(x = wheelbase, y = price)) +
+      geom_point(color = "red", alpha = 0.6) +
+    labs(y = "Precio",
+       x = "Distancia entre los ejes del carro")+
+      theme_minimal()
+
+datos %>% ggplot(aes(x = curbweight, y = price)) +
+      geom_point(color = "red", alpha = 0.6) +
+      labs(y = "Precio",
+       x = "Peso del carro sin ocupantes ni equipaje")+
+      theme_minimal()
+```
+
+
+De la @fig-disp3 se observa claramente que el peso del carro en vacío tiene una alta correlación ($0.84$) con el precio del carro. A medida que aumenta el peso en vacío, el precio del carro también incrementa de manera significativa. Aunque la distancia entre ejes y el precio no presentan una correlación tan alta, todavía existe una relación positiva. Por lo tanto, un aumento en la distancia entre ejes también está asociado con un incremento en el precio del carro.
+
+
+\newpage
+
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-bar
+#| fig-cap: "Gráfico de barras"
+#| fig-subcap: 
+#|   - "carbody"
+#|   - "average price vs carbody"
+
+
+datos %>% ggplot(aes(x = factor(carbody))) +
+    geom_bar(fill = "steelblue") +
+    theme_minimal()+
+  labs(x = "Tipo de carrocería del carro",
+       y = "Frecuencia")
+
+  
+
+datos %>%
+    group_by(carbody) %>%
+    summarise(avg_price = mean(price, na.rm = TRUE)) %>%
+    arrange(desc(avg_price)) %>% 
+    ggplot(aes(x = carbody, y = avg_price)) +
+    geom_bar(stat = "identity", fill = "coral") +
+    theme_minimal() +
+    labs(x = "Tipo de carrocería del carro",
+       y = "Precio Promedio")
+
+```
+De la @fig-bar se observa que los carros con carrocería sedán son los más vendidos, seguidos por los hatchback.Por otro lado, los descapotables y los de techo rígido tienen menores ventas. Estos últimos son también los más caros, seguidos de los descapotables. Es importante señalar que los descapotables y los carros con techo rígido se venden menos debido a su alto costo, lo que los hace menos atractivos para la mayoría de los clientes.  Aunque la carrocería sedán ocupa el tercer lugar en términos de precio, sigue siendo la más popular, lo que sugiere que los clientes prefieren carros de gama media.
+
+
+
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-bar2
+#| fig-cap: "Gráfico de barras"
+#| fig-subcap: 
+#|   - "enginetype"
+#|   - "average price vs enginetype"
+
+
+datos %>% ggplot(aes(x = factor(enginetype))) +
+    geom_bar(fill = "steelblue") +
+    theme_minimal()+
+  labs(x = "Tipo de motor del carro",
+       y = "Frecuencia")
+
+  
+
+datos %>%
+    group_by(enginetype) %>%
+    summarise(avg_price = mean(price, na.rm = TRUE)) %>%
+    arrange(desc(avg_price)) %>% 
+    ggplot(aes(x = enginetype, y = avg_price)) +
+    geom_bar(stat = "identity", fill = "coral") +
+    theme_minimal() +
+    labs(x = "Tipo de motor del carro",
+       y = "Precio Promedio")
+```
+
+
+De la @fig-bar2 observamos que la mayoría de los carros vendidos tienen motores de árbol de levas en cabeza (OHC).Solo se ha vendido un carro con motor DOHCV, y existen muy pocos datos disponibles para los motores DOHCV y de rotor. Los carros con motores DOHCV son, en su mayoría, más caros. Por otro lado, los carros con motores OHC son los menos costosos.
+
+
+\newpage
+
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-bar3
+#| fig-cap: "Gráfico de barras"
+#| fig-subcap: 
+#|   - "enginetype"
+#|   - "average price vs enginetype"
+
+
+datos %>% ggplot(aes(x = factor(fueltype))) +
+    geom_bar(fill = "steelblue") +
+    theme_minimal()+
+  labs(x = "Tipo de combustible del carro",
+       y = "Frecuencia")
+
+  
+
+datos %>%
+    group_by(fueltype) %>%
+    summarise(avg_price = mean(price, na.rm = TRUE)) %>%
+    arrange(desc(avg_price)) %>% 
+    ggplot(aes(x = fueltype, y = avg_price)) +
+    geom_bar(stat = "identity", fill = "coral") +
+    theme_minimal() +
+    labs(x = "Tipo de combustible del carro",
+       y = "Precio Promedio")
+```
+
+
+
+
+De la @fig-bar3 podemos deducir que los carros con sistema de combustible a gas son los más preferidos, ademas se obeerva que el precio medio de los carros a gasolina es inferior al de los carros a diésel. Por lo tanto, podemos inferir que los clientes tienden a preferir carros que consumen menos combustible.
+
+
+# Conclusión
+
+Después de realizar el análisis descriptivo, observamos que algunas variables parecen tener una mayor influencia en la explicación del precio de los automóviles, mientras que otras presentan una relación menos significativa. Además, identificamos que, en ciertas variables categóricas, algunas categorías tienen un número reducido de observaciones, lo que podría limitar su representatividad en los análisis posteriores. Por ello, será importante evaluar cómo estas características afectan la interpretación y robustez de los resultados.
+
+
+
+
+<!------------------------- Segunda entrega ----------------------------------->
+
+
+
+
+# Segunda Entrega
+
+
+## Punto 1
+
+Ajuste un modelo de regresion lineal multiple unicamente con las covariables continuas, muestre la tabla de parametros ajustados y escriba la ecuacion ajustada. Calcule la Anova del modelo ¿Es significativo el modelo? ¿Que proporcion de la variabilidad total de la respuesta es explicada por el modelo? Opine sobre esto ultimo.
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
