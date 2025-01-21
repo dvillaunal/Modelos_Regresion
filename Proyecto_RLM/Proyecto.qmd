@@ -28,30 +28,30 @@ library(kableExtra)
 library(knitr)
 library(corrplot)
 library(pander)
+
+source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/FuncionesdeUsuarioRLM.R")
 ```
 
-
-
 \begin{titlepage}
-	\begin{center}
-		{\LARGE \textbf{Universidad Nacional De Colombia}} \\
-		
-		\vspace{4mm}
-		
-		{\Large \textbf{Sede Medellín}}
-		\vspace{0.3cm}
-		\begin{figure}[h]
-			\centering
-		\includegraphics[height=5cm]{logo.jpg}
-		\end{figure}
-	
-	\vspace{1mm}
-	
-	{\LARGE \textbf{Facultad de Ciencias}}
-	\vspace{5mm}
-	
+    \begin{center}
+        {\LARGE \textbf{Universidad Nacional De Colombia}} \\
+        
+        \vspace{4mm}
+        
+        {\Large \textbf{Sede Medellín}}
+        \vspace{0.3cm}
+        \begin{figure}[h]
+            \centering
+        \includegraphics[height=5cm]{logo.jpg}
+        \end{figure}
+    
+    \vspace{1mm}
+    
+    {\LARGE \textbf{Facultad de Ciencias}}
+    \vspace{5mm}
+    
     {\Large Departamento de Estadística}
-	\vspace{1.4cm}
+    \vspace{1.4cm}
 
     {\LARGE\textbf{Proyecto - 1 Entrega}}
     \vspace{1.4cm}    
@@ -64,17 +64,14 @@ library(pander)
     
     {\Large \textbf{Juan Gabriel Carvajal Negrete}}
     \vspace{1.4cm}
-	
+    
     {\Large Modelos de Regresión}
-	\vspace{1cm}
+    \vspace{1cm}
     
     {\Large\textbf{Diciembre, 2024}}
 
-	\end{center}
+    \end{center}
 \end{titlepage}
-
-
-
 
 # Contexto de los datos
 
@@ -95,8 +92,8 @@ Se requiere modelar el precio de los automóviles utilizando las variables indep
 
 ## Descripcion de las variables
 
-- `Car_ID`: ID único de cada observación (entero).
-- `Symboling`: Clasificación del riesgo de seguro; un valor de +3 indica que el automóvil tiene alto riesgo y un valor de -3 indica que probablemente es seguro (categórico).
+-   `Car_ID`: ID único de cada observación (entero).
+-   `Symboling`: Clasificación del riesgo de seguro; un valor de +3 indica que el automóvil tiene alto riesgo y un valor de -3 indica que probablemente es seguro (categórico).
 -   `fueltype`: Tipo de combustible del automóvil, por ejemplo, gasolina o diésel (categórico).
 -   `aspiration`: Tipo de aspiración utilizado en el automóvil (categórico).
 -   `doornumber`: Número de puertas del automóvil (categórico).
@@ -127,14 +124,11 @@ datos <- read.csv("CarPrice_Assignment.csv") #carga de los datos
 datos %<>% clean_names() # limpieza de los nombres de las variables
 ```
 
-
 El conjunto de datos está formado por 205 registros y 26 variables, sin valores ausentes en las variables.
-
 
 # Limpieza de los datos
 
 En la variable `car_name` podemos observar que los valores almacenan tanto el nombre de la empresa como el nombre del coche por lo cual hay 147 categorias distintas. Por tanto limpiaremos esa variable separarando los nombres de las empresas de carros de la variable `car_name`. Por lo tanto crearemos una variable llamada `company_name` la cual tendra solo el nombre de la empresa o compañia a la cual pertenece el carro.
-
 
 ```{r}
 #| echo: false
@@ -145,16 +139,16 @@ datos$company_name <- sapply(strsplit(as.character(datos$car_name), " "), `[`, 1
 
 datos$company_name %>% unique()
 ```
+
 Vemos que hay algunas categorías de la variable `company_name` estan mal escritas como:
 
-- maxda = mazda
-- Nissan = nissan
-- porsche = porcshce
-- toyota = toyouta
-- vokswagen = volkswagen = vw
+-   maxda = mazda
+-   Nissan = nissan
+-   porsche = porcshce
+-   toyota = toyouta
+-   vokswagen = volkswagen = vw
 
 Reemplazaremos los nombres incorrectos con el nombre correcto de la empresa.
-
 
 ```{r}
 #| echo: false
@@ -168,33 +162,21 @@ datos$company_name <- str_replace(datos$company_name, 'vw', 'volkswagen')
 datos$company_name <- str_replace(datos$company_name, 'Nissan', 'nissan')
 ```
 
-
-
-
-
-
 # Análisis descriptivo de los datos.
 
 Para el análisis exploratorio de datos, y dado el gran número de variables disponibles, se seleccionarán aquellas que, según la investigación previa, podrían ser relevantes para explicar el comportamiento del precio. En este análisis se evaluará la correlación entre las variables numéricas, así como su relación con la variable precio. Para las variables categóricas, se analizará su interacción con el precio, buscando patrones o asociaciones significativas, por tanto las variables que probablemente sean más importantes para predecir el precio de un automóvil:
 
+-   **Dimensiones del vehículo**: Las variables `wheelbase`, `carlength`, `carwidth`, y `carheight` podrían estar correlacionados con el precio porque un automóvil más grande o más espacioso tiende a ser más caro.
 
-- **Dimensiones del vehículo**: Las variables `wheelbase`, `carlength`, `carwidth`, y `carheight` podrían estar correlacionados con el precio porque un automóvil más grande o más espacioso tiende a ser más caro.
+-   **Especificaciones del motor**: Variables como `enginesize`, `horsepower`, y `compressionratio` están directamente relacionados con el rendimiento del automóvil y podrían influir significativamente en el precio.
 
-- **Especificaciones del motor**: Variables como `enginesize`, `horsepower`, y `compressionratio` están directamente relacionados con el rendimiento del automóvil y podrían influir significativamente en el precio.
+-   **Peso**: La variable `curbweight` puede ser un buen indicador del tipo y tamaño del vehículo, y suele correlacionarse con el precio.
 
-- **Peso**: La variable `curbweight` puede ser un buen indicador del tipo y tamaño del vehículo, y suele correlacionarse con el precio.
-
-- **Eficiencia de combustible**: Las variables `citympg` y `highwaympg` podrían influir en el precio, ya que los automóviles más eficientes suelen tener precios diferentes según el segmento de mercado.
-
+-   **Eficiencia de combustible**: Las variables `citympg` y `highwaympg` podrían influir en el precio, ya que los automóviles más eficientes suelen tener precios diferentes según el segmento de mercado.
 
 La variables categóricas como `carbody`, `drivewheel`, `fueltype`,`enginetype` y `company_name` suelen ser indicadores del tipo de vehículo y su mercado objetivo.
 
-
-
-
-
 ## Variable respuesta
-
 
 ```{r}
 #| layout-ncol: 2
@@ -239,17 +221,9 @@ ggplot(datos, aes(y = price)) +
   theme_minimal()
 ```
 
-
-
-
-
-
 <!-- Mejorar esta redaccion -->
 
 De la @fig-precio podemos decir que los precios de los carros tienen una distribución asimétrica, concentrándose en valores bajos, pero con una minoría de carros significativamente más caros, ademas el precio de la mayoría de los carros está por debajo de 14000. Existe una diferencia significativa entre el valor medio y la mediana y los valores atípicos en el rango superior deben considerarse, ya que pueden representar carros de lujo o especiales por tanto análizaremos ahora la variable que corresponde al nombre de la empresa o compañia a la cual pertenece el carro para ver que relación existe con el precio.
-
-
-
 
 ```{r}
 #| echo: false
@@ -259,12 +233,6 @@ data_numeric <- datos %>%
   select(wheelbase, carlength, carwidth, carheight, enginesize, horsepower,
          curbweight, compressionratio,price)
 ```
-
-
-
-
-
-
 
 ```{r}
 #| echo: false
@@ -284,19 +252,11 @@ corrplot(corr,
          diag = FALSE)
 ```
 
-
-
-
 De la @fig-corr se pueden extraer las siguientes conclusiones:
 
 -   Las variables que tienen una mayor relacion lineal con el precio son : `enginesize` ($r=0.87$), `curbweight` ($r = 0.84$) , `horsepower` ($r = 0.81$) y `carwidth` ($r= 0.76$).
 
 -   Hay pares de variables que tienen correlacion alta por lo que posiblemente no sea útil introducir algunas pares de variables en el modelo.
-
-
-
-
-
 
 ```{r}
 #| echo: false
@@ -318,12 +278,9 @@ datos %>% count(company_name) %>%
     legend.position = "none")
 ```
 
-
-
 \newpage
 
 De la @fig-empresa, observamos que la mayoria de los carros en este conjunto de datos está dominado por unas pocas marcas, especialmente Toyota, que supera ampliamente a las demás,por lo tanto, podemos decir que Toyota es la empresa preferida de los clientes.
-
 
 \newpage
 
@@ -365,14 +322,7 @@ datos %>% group_by(company_name) %>%
     axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-
-
-
-
 A partir de la @fig-empresa2 , observamos una diferencia significativa en el precio de los carros según la empresa a la que pertenecen. **Jaguar** y **Buick** parecen ofrecer los carros con las gamas de precios más altas.
-
-
-
 
 ```{r}
 #| layout-ncol: 2
@@ -396,8 +346,6 @@ datos %>% ggplot(aes(x = carwidth, y = price)) +
        x = "Ancho del carro")+
       theme_minimal()
 ```
-
-
 
 De la @fig-disp se observa claramente que la longitud y la anchura del carro están estrechamente relacionadas con su precio.A medida que aumentan la longitud y la anchura del carro, también tiende a aumentar su precio.Sin embargo, no es posible hacer inferencias claras basadas únicamente en la relación entre la longitud y el precio, debido a la alta dispersión de los datos.La altura del carro no parece tener un impacto significativo en el precio.
 
@@ -426,12 +374,7 @@ datos %>% ggplot(aes(x = highwaympg, y = price)) +
       theme_minimal()
 ```
 
-
-
-De la @fig-disp2 se observa claramente que `citympg` y `highwaympg` tienen una correlación negativa con el precio del carro. A medida que aumentan los valores de `citympg` y `highwaympg`, el precio del carro tiende a disminuir. Dado que ambas características están relacionadas con el precio de manera significativa, `citympg` y `highwaympg` son características útiles para predecir el precio de los carros. 
-
-
-
+De la @fig-disp2 se observa claramente que `citympg` y `highwaympg` tienen una correlación negativa con el precio del carro. A medida que aumentan los valores de `citympg` y `highwaympg`, el precio del carro tiende a disminuir. Dado que ambas características están relacionadas con el precio de manera significativa, `citympg` y `highwaympg` son características útiles para predecir el precio de los carros.
 
 ```{r}
 #| layout-ncol: 2
@@ -456,9 +399,7 @@ datos %>% ggplot(aes(x = curbweight, y = price)) +
       theme_minimal()
 ```
 
-
 De la @fig-disp3 se observa claramente que el peso del carro en vacío tiene una alta correlación ($0.84$) con el precio del carro. A medida que aumenta el peso en vacío, el precio del carro también incrementa de manera significativa. Aunque la distancia entre ejes y el precio no presentan una correlación tan alta, todavía existe una relación positiva. Por lo tanto, un aumento en la distancia entre ejes también está asociado con un incremento en el precio del carro.
-
 
 \newpage
 
@@ -491,9 +432,8 @@ datos %>%
        y = "Precio Promedio")
 
 ```
-De la @fig-bar se observa que los carros con carrocería sedán son los más vendidos, seguidos por los hatchback.Por otro lado, los descapotables y los de techo rígido tienen menores ventas. Estos últimos son también los más caros, seguidos de los descapotables. Es importante señalar que los descapotables y los carros con techo rígido se venden menos debido a su alto costo, lo que los hace menos atractivos para la mayoría de los clientes.  Aunque la carrocería sedán ocupa el tercer lugar en términos de precio, sigue siendo la más popular, lo que sugiere que los clientes prefieren carros de gama media.
 
-
+De la @fig-bar se observa que los carros con carrocería sedán son los más vendidos, seguidos por los hatchback.Por otro lado, los descapotables y los de techo rígido tienen menores ventas. Estos últimos son también los más caros, seguidos de los descapotables. Es importante señalar que los descapotables y los carros con techo rígido se venden menos debido a su alto costo, lo que los hace menos atractivos para la mayoría de los clientes. Aunque la carrocería sedán ocupa el tercer lugar en términos de precio, sigue siendo la más popular, lo que sugiere que los clientes prefieren carros de gama media.
 
 ```{r}
 #| layout-ncol: 2
@@ -524,9 +464,7 @@ datos %>%
        y = "Precio Promedio")
 ```
 
-
 De la @fig-bar2 observamos que la mayoría de los carros vendidos tienen motores de árbol de levas en cabeza (OHC).Solo se ha vendido un carro con motor DOHCV, y existen muy pocos datos disponibles para los motores DOHCV y de rotor. Los carros con motores DOHCV son, en su mayoría, más caros. Por otro lado, los carros con motores OHC son los menos costosos.
-
 
 \newpage
 
@@ -559,53 +497,228 @@ datos %>%
        y = "Precio Promedio")
 ```
 
-
-
-
 De la @fig-bar3 podemos deducir que los carros con sistema de combustible a gas son los más preferidos, ademas se obeerva que el precio medio de los carros a gasolina es inferior al de los carros a diésel. Por lo tanto, podemos inferir que los clientes tienden a preferir carros que consumen menos combustible.
-
 
 # Conclusión
 
 Después de realizar el análisis descriptivo, observamos que algunas variables parecen tener una mayor influencia en la explicación del precio de los automóviles, mientras que otras presentan una relación menos significativa. Además, identificamos que, en ciertas variables categóricas, algunas categorías tienen un número reducido de observaciones, lo que podría limitar su representatividad en los análisis posteriores. Por ello, será importante evaluar cómo estas características afectan la interpretación y robustez de los resultados.
 
-
-
-
 <!------------------------- Segunda entrega ----------------------------------->
-
-
-
 
 # Segunda Entrega
 
-
 ## Punto 1
 
-Ajuste un modelo de regresion lineal multiple unicamente con las covariables continuas, muestre la tabla de parametros ajustados y escriba la ecuacion ajustada. Calcule la Anova del modelo ¿Es significativo el modelo? ¿Que proporcion de la variabilidad total de la respuesta es explicada por el modelo? Opine sobre esto ultimo.
+Ajuste un modelo de regresión lineal múltiple únicamente con las covariables continuas, muestre la tabla de parámetros ajustados y escriba la ecuación ajustada. Calcule la Anova del modelo ¿Es significativo el modelo? ¿Que proporción de la variabilidad total de la respuesta es explicada por el modelo? Opine sobre esto ultimo.
 
- 
+```{r}
+# seleccion de variables continuas
+
+var_continuas <- datos %>% 
+  select(wheelbase, carlength, carwidth, carheight, boreratio, stroke,
+         compressionratio, price)
+
+# Ajuste del modelo con las variables continuas
+
+mod_cont <- lm(price ~., data = var_continuas)
+```
+
+```{r}
+#| echo: false
+#| label: tbl-parametros
+#| tbl-cap: Parámetros ajustados
+summary(mod_cont)$coefficients %>% kable(digits = 3)
+```
+
+El modelo ajustado es:
+
+$$
+\hat{Y} = -130372.23 - 120.34X_1 + 181.66X_2 + 2142.93X_3 -480.86X_4 + 3782.87X_5 -1181.08X_6 -23.42X_7
+$$
+
+```{r}
+MiAnova(mod_cont)
+```
+
+## Punto 2
+
+Calcule los coeficientes de regresión estandarizados y concluya acerca de cual de las variables aporta mas a la respuesta según la magnitud en valor absoluto de tales coeficientes (cuidado, no confunda esto con la significancia de los coeficientes de regresión).
+
+```{r}
+#| label: tbl-parametros2
+#| echo: false
+#| message: false
+#| warning: false
+#| tbl-cap: Coeficientes estimados y Coeficientes estimados estandarizados
+
+miscoeficientes(mod_cont)[c(1,5)] %>% kable()
+```
+
+## Punto 3
+
+Pruebe la significancia individual de cada uno de los parámetros del modelo (excepto intercepto), usando la prueba t, establezca claramente la prueba de hipótesis y el criterio de decisión.
+
+La hipotesis para la prueba t de la significancia individual de cada uno de los parametros $\beta_j$ (excepto el intercepto $\beta_0$):esta dada por:
+
+$$
+H_0 : \beta_j = 0 \quad vs \quad H_1 : \beta_j \neq 0
+$$
+
+Mediante el siguiente estadístico de prueba con su distribución bajo $H_0$ y criterios de rechazo:
+
+$\text{Estadístico de prueba: } T_0 = \frac{\hat{\beta}_j}{\sqrt{\text{MSE} \, C_{jj}}} \overset{H_0}{\sim} t_{n-k-1}$
+
+$\text{Rechazo con valor P: si } P(|t_{n-k-1}| > |T_0|) \text{ es pequeño};$
+
+$\text{Rechazo con región crítica a un nivel de significancia } \alpha: \text{ si } |T_0| > t_{\alpha/2, n-k-1}$.
+
+De la @tbl-parametros observamos las variables `carlength` , `carwidth`, `carheight` y `boreratio` son significativas.
+
+## Punto 4
+
+Teniendo en cuenta los resultados anteriores, realice una prueba con sumas de cuadrados extras con test lineal general; especifique claramente el modelo reducido y completo, estadístico de la prueba, su distribución, cálculo de valor P, decisión y conclusión a la luz de los datos. Justifique la hipótesis que desea probar en este numeral.
+
+## Punto 5
+
+Construya y analice gráficos de los residuales estudentizados vs. Valores ajustados y contra las variables de regresión utilizadas. ¿Que información proporcionan estas gráficas?
+
+```{r}
+#| echo: false
+#| layout-ncol: 3
+
+# Residuales estudentizados
+residuales_estudentizados <- rstudent(mod_cont)
+
+# Valores ajustados
+valores_ajustados <- fitted(mod_cont)
+
+# Gráfico 1: Residuales estudentizados vs. Valores ajustados
+plot(valores_ajustados, residuales_estudentizados,
+     main = "Residuales estudentizados vs. Valores ajustados",
+     xlab = "Valores ajustados",
+     ylab = "Residuales estudentizados",
+     pch = 19, col = "blue")
+abline(h = 0, col = "red", lwd = 2)  # Línea horizontal en 0
+
+# Gráficos 2: Residuales estudentizados vs. Variables independientes
+variables <- names(mod_cont$model)[-1]  # Nombres de las variables independientes
+
+for (var in variables) {
+  plot(mod_cont$model[[var]], residuales_estudentizados,
+       main = paste("Residuales estudentizados vs.", var),
+       xlab = var,
+       ylab = "Residuales estudentizados",
+       pch = 19, col = "blue")
+  abline(h = 0, col = "red", lwd = 2)  # Línea horizontal en 0
+}
+
+```
+
+
+
+Del gráfico anterior podemos decir que
+
+- Los gráficos sugieren que podría haber problemas de varianza no constante (heterocedasticidad), especialmente en los extremos de los valores ajustados y en variables como `boreratio` y `compressionratio`.
+
+- En variables como `stroke`, el patrón observado podría indicar que una relación no lineal no está siendo capturada.
+
+- Hay algunos puntos extremos que podrían estar influyendo en el modelo.
 
 
 
 
+\newpage
+
+## Punto 6
+
+Construya una gráfica de probabilidad normal para los residuales estudentizados. ¿Existen razones para dudar de la hipótesis de normalidad sobre los errores en este modelo?
+
+```{r}
+#| echo: false
+#| label: fig-QQ
+#| fig-cap: "Gráfico Q-Q Residuales Estudentizados"
+
+# Calcular los residuales estudentizados
+residuales_estudentizados <- rstudent(mod_cont)
+
+# Crear el QQ plot
+qqnorm(residuales_estudentizados)
+qqline(residuales_estudentizados, 
+       col = "red", 
+       lwd = 2)
+```
+
+De la @fig-QQ observamos posibles indicios de que los errores podrían no seguir perfectamente una distribución normal debido a la desviación de algunos puntos en los extremos.
+
+## Punto 7
+
+Diagnostique la presencia de observaciones atípiacs, de balanceo y/o influenciales y concluya.
+
+Para esto utilizaremos la función `influencePlot()`.
+
+```{r}
+#| eval: false
+#| echo: true
+
+influencePlot(mod_cont)
+```
+
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-diagnostico
+#| tbl-cap: Observaciones potencialmente influyentes, de balanceo y/o atípiacs 
+
+cat("
+\\begin{table}
+\\centering
+\\begin{tabular}{cccc}
+\\hline
+\\textbf{Index} & \\textbf{StudRes} & \\textbf{Hat} & \\textbf{CookD} \\\\ \\hline
+28 & 4.20659283 & 0.0584620 & 1.266128e-01 \\\\
+29 & 4.92766935 & 0.0584620 & 1.685452e-01 \\\\
+30 & 0.01077858 & 0.1803456 & 3.211570e-06 \\\\
+35 & 0.22152729 & 0.2372586 & 1.917390e-03 \\\\ \\hline
+\\end{tabular}
+\\end{table}
+")
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-ubral
+#| tbl-cap: Valores de umbrales (Threshold values)
+
+
+cat("
+\\begin{table}
+\\centering
+\\begin{tabular}{ccccccc}
+\\hline
+\\textbf{Threshold values} & \\textbf{dfbeta} & \\textbf{dffit} & \\textbf{cov.r} & \\textbf{Cook.d} & \\textbf{hat} & \\textbf{StudRes} \\\\ \\hline
+1 & 0.1396861 & 0.3950918 & 0.1170732 & 0.02030457 & 0.07804878 & 2 \\\\ \\hline
+\\end{tabular}
+\\end{table}
+")
+```
+
+De la @tbl-diagnostico podemos concluir que:
+
+- Las observaciones 28 y 29 son outliers claros según sus residuales estandarizados y podrían requerir mayor análisis o tratamiento.
+
+
+- Las observaciones 30 y 35 aunque no son outliers extremos, tienen valores de leverage moderadamente altos, lo que indica que podrían tener un impacto significativo en el modelo.
 
 
 
 
+\newpage
 
+## Punto 8
 
-
-
-
-
-
-
-
-
-
-
-
+Suponga que algunas de las observaciones que presentaron problemas en el numeral anterior son por problemas de digitación, elimínelas (no mas de 10) y ajuste el modelo de regresión sin dichas observaciones. Presente solo la tabla de parámetros ajustados resultante ¿Cambian notoriamente las estimaciones de los parámetros, sus errores estandard y/o la signficancia? ¿Que concluye al respecto? Evalue el grafico de normalidad para los residuales estudentizados para este ajuste ¿mejor´o la normalidad? Concluya sobre los efectos de estas observaciones.
 
 
 

@@ -20,3 +20,7 @@ kableExtra
 knitr
 corrplot
 pander
+carData
+car
+rsm
+olsrr
