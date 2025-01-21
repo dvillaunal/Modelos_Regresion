@@ -1,6 +1,9 @@
 ---
 lang: es
-format: pdf
+format: 
+  pdf:
+    include-in-header:
+      - file: preamble.tex
 highlight-style: tango
 
 editor: source
@@ -53,7 +56,7 @@ source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/Funci
     {\Large Departamento de Estadística}
     \vspace{1.4cm}
 
-    {\LARGE\textbf{Proyecto - 1 Entrega}}
+    {\LARGE\textbf{Proyecto - 1 y 2 Entrega}}
     \vspace{1.4cm}    
     
     {\Large \textbf{Daniel Felipe Villa Rengifo}}
@@ -66,12 +69,15 @@ source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/Funci
     \vspace{1.4cm}
     
     {\Large Modelos de Regresión}
-    \vspace{1cm}
+    \vspace{0.5cm}
     
-    {\Large\textbf{Diciembre, 2024}}
+    {\Large\textbf{Enero, 2025}}
 
     \end{center}
 \end{titlepage}
+
+
+
 
 # Contexto de los datos
 
@@ -176,6 +182,8 @@ Para el análisis exploratorio de datos, y dado el gran número de variables dis
 
 La variables categóricas como `carbody`, `drivewheel`, `fueltype`,`enginetype` y `company_name` suelen ser indicadores del tipo de vehículo y su mercado objetivo.
 
+\newpage
+
 ## Variable respuesta
 
 ```{r}
@@ -223,7 +231,7 @@ ggplot(datos, aes(y = price)) +
 
 <!-- Mejorar esta redaccion -->
 
-De la @fig-precio podemos decir que los precios de los carros tienen una distribución asimétrica, concentrándose en valores bajos, pero con una minoría de carros significativamente más caros, ademas el precio de la mayoría de los carros está por debajo de 14000. Existe una diferencia significativa entre el valor medio y la mediana y los valores atípicos en el rango superior deben considerarse, ya que pueden representar carros de lujo o especiales por tanto análizaremos ahora la variable que corresponde al nombre de la empresa o compañia a la cual pertenece el carro para ver que relación existe con el precio.
+De la @fig-precio podemos decir que los precios de los carros tienen una distribución asimétrica, concentrándose en valores bajos, pero con una minoría de carros significativamente más caros, debido a la distribucion puede exister porblemas de normalidad.Los valores atípicos en el rango superior deben considerarse, ya que pueden representar carros de lujo o especiales por tanto análizaremos ahora la variable que corresponde al nombre de la empresa o compañia a la cual pertenece el carro para ver que relación existe con el precio.
 
 ```{r}
 #| echo: false
@@ -233,6 +241,8 @@ data_numeric <- datos %>%
   select(wheelbase, carlength, carwidth, carheight, enginesize, horsepower,
          curbweight, compressionratio,price)
 ```
+
+\newpage
 
 ```{r}
 #| echo: false
@@ -256,7 +266,9 @@ De la @fig-corr se pueden extraer las siguientes conclusiones:
 
 -   Las variables que tienen una mayor relacion lineal con el precio son : `enginesize` ($r=0.87$), `curbweight` ($r = 0.84$) , `horsepower` ($r = 0.81$) y `carwidth` ($r= 0.76$).
 
--   Hay pares de variables que tienen correlacion alta por lo que posiblemente no sea útil introducir algunas pares de variables en el modelo.
+-   Hay pares de variables que tienen correlacion alta como `Enginesize` y `horsepower`: 0.8098 ,` Wheelbase` y `carlength`: 0.8746 , `Carlength` y `curbweight`: 0.8777 por lo que posiblemente no sea útil introducir algunas pares de variables en el modelo para evitar multicolinealidad.
+
+\newpage
 
 ```{r}
 #| echo: false
@@ -278,9 +290,10 @@ datos %>% count(company_name) %>%
     legend.position = "none")
 ```
 
-\newpage
+
 
 De la @fig-empresa, observamos que la mayoria de los carros en este conjunto de datos está dominado por unas pocas marcas, especialmente Toyota, que supera ampliamente a las demás,por lo tanto, podemos decir que Toyota es la empresa preferida de los clientes.
+
 
 \newpage
 
@@ -349,6 +362,7 @@ datos %>% ggplot(aes(x = carwidth, y = price)) +
 
 De la @fig-disp se observa claramente que la longitud y la anchura del carro están estrechamente relacionadas con su precio.A medida que aumentan la longitud y la anchura del carro, también tiende a aumentar su precio.Sin embargo, no es posible hacer inferencias claras basadas únicamente en la relación entre la longitud y el precio, debido a la alta dispersión de los datos.La altura del carro no parece tener un impacto significativo en el precio.
 
+
 \newpage
 
 ```{r}
@@ -374,7 +388,14 @@ datos %>% ggplot(aes(x = highwaympg, y = price)) +
       theme_minimal()
 ```
 
+
+
+
 De la @fig-disp2 se observa claramente que `citympg` y `highwaympg` tienen una correlación negativa con el precio del carro. A medida que aumentan los valores de `citympg` y `highwaympg`, el precio del carro tiende a disminuir. Dado que ambas características están relacionadas con el precio de manera significativa, `citympg` y `highwaympg` son características útiles para predecir el precio de los carros.
+
+
+\newpage
+
 
 ```{r}
 #| layout-ncol: 2
@@ -401,7 +422,7 @@ datos %>% ggplot(aes(x = curbweight, y = price)) +
 
 De la @fig-disp3 se observa claramente que el peso del carro en vacío tiene una alta correlación ($0.84$) con el precio del carro. A medida que aumenta el peso en vacío, el precio del carro también incrementa de manera significativa. Aunque la distancia entre ejes y el precio no presentan una correlación tan alta, todavía existe una relación positiva. Por lo tanto, un aumento en la distancia entre ejes también está asociado con un incremento en el precio del carro.
 
-\newpage
+
 
 ```{r}
 #| layout-ncol: 2
@@ -466,7 +487,7 @@ datos %>%
 
 De la @fig-bar2 observamos que la mayoría de los carros vendidos tienen motores de árbol de levas en cabeza (OHC).Solo se ha vendido un carro con motor DOHCV, y existen muy pocos datos disponibles para los motores DOHCV y de rotor. Los carros con motores DOHCV son, en su mayoría, más caros. Por otro lado, los carros con motores OHC son los menos costosos.
 
-\newpage
+
 
 ```{r}
 #| layout-ncol: 2
@@ -513,13 +534,10 @@ Ajuste un modelo de regresión lineal múltiple únicamente con las covariables 
 
 ```{r}
 # seleccion de variables continuas
-
 var_continuas <- datos %>% 
   select(wheelbase, carlength, carwidth, carheight, boreratio, stroke,
          compressionratio, price)
-
 # Ajuste del modelo con las variables continuas
-
 mod_cont <- lm(price ~., data = var_continuas)
 ```
 
@@ -540,9 +558,21 @@ $$
 MiAnova(mod_cont)
 ```
 
+Del resultado de la tabla anova podemos concluir que
+
+\begin{itemize}
+    \item El modelo es altamente significativo globalmente (\( p < 2.2 \times 10^{-16} \)).
+    \item Las variables significativas individuales son \texttt{carlength}, \texttt{carwidth}, \texttt{carheight} y \texttt{boreratio}.
+    \item El modelo explica el \( 62.48\% \) de la variabilidad en los precios, lo que lo convierte en un modelo razonablemente efectivo, aunque con espacio para mejorar.
+\end{itemize}
+
+
+
 ## Punto 2
 
 Calcule los coeficientes de regresión estandarizados y concluya acerca de cual de las variables aporta mas a la respuesta según la magnitud en valor absoluto de tales coeficientes (cuidado, no confunda esto con la significancia de los coeficientes de regresión).
+
+\newpage
 
 ```{r}
 #| label: tbl-parametros2
@@ -553,6 +583,12 @@ Calcule los coeficientes de regresión estandarizados y concluya acerca de cual 
 
 miscoeficientes(mod_cont)[c(1,5)] %>% kable()
 ```
+
+De la @tbl-parametros2 podemos concluir con respecto a los coeficientes estandarizados.
+
+- La variable `carwidth` es, con diferencia, la variable que tiene el mayor aporte a la respuesta, según la magnitud absoluta.
+
+- Las variables `compressionratio` y `stroke` aportan muy poco a la respuesta.
 
 ## Punto 3
 
@@ -577,6 +613,74 @@ De la @tbl-parametros observamos las variables `carlength` , `carwidth`, `carhei
 ## Punto 4
 
 Teniendo en cuenta los resultados anteriores, realice una prueba con sumas de cuadrados extras con test lineal general; especifique claramente el modelo reducido y completo, estadístico de la prueba, su distribución, cálculo de valor P, decisión y conclusión a la luz de los datos. Justifique la hipótesis que desea probar en este numeral.
+
+
+Teniendo encuenta el resultado anterior tenemos que la hipotesis a probar es:
+
+
+\begin{itemize}
+    \item \( H_0 \): Las variables significativas identificadas en la Tabla 1 (\texttt{carlength}, \texttt{carwidth}, \texttt{carheight} y \texttt{boreratio}) no contribuyen significativamente al modelo.
+    \item \( H_1 \): Al menos una de estas variables contribuye significativamente al modelo.
+\end{itemize}
+
+
+El modelo completo(MF):
+
+\begin{align*}  
+Y_i = \beta_0 + \beta_1 \text{\texttt{wheelbase}} + \beta_2 \text{\texttt{carlength}} + \beta_3 \text{\texttt{carwidth}} + \beta_4 \text{\texttt{carheight}} + \\ \beta_5
+\text{\texttt{boreratio}} + \beta_6 \text{\texttt{stroke}} + \beta_7 \text{\texttt{compressionratio}} + \epsilon
+\end{align*}  
+    
+
+El modeloreducido(MR): 
+
+\begin{equation*}
+Y_i = \beta_0 + \beta_1 \text{\texttt{wheelbase}} + \beta_6 \text{\texttt{stroke}} + \beta_7 \text{\texttt{compressionratio}} + \epsilon
+\end{equation*}
+
+\textbf{Especificación de la prueba:}
+
+\begin{itemize}
+    \item El estadístico de prueba utilizado es el estadístico \( F \), definido como:
+    \[
+    F = \frac{\text{(RSS\_reducido - RSS\_completo) / (p\_completo - p\_reducido)}}{\text{RSS\_completo / (n - p\_completo)}}
+    \]
+    donde:
+    \begin{itemize}
+        \item \text{RSS\_reducido}: Suma de cuadrados residuales del modelo reducido.
+        \item \text{RSS\_completo}: Suma de cuadrados residuales del modelo completo.
+        \item \( p \): Número de parámetros en el modelo.
+        \item \( n \): Número de observaciones.
+    \end{itemize}
+    \item El estadístico \( F \) sigue una distribución \( F \) de Fisher con:
+    \[
+    \text{gl\_numerador} = p\_completo - p\_reducido = 4, \quad \text{gl\_denominador} = n - p\_completo = 197
+    \]
+\end{itemize}
+
+
+
+```{r}
+
+# Ajuste del modelo completo
+MF <- lm(price ~ wheelbase + carlength + carwidth + carheight + 
+                      boreratio + stroke + compressionratio, 
+         data = var_continuas)
+
+linearHypothesis(MF, c("carlength=0", "carwidth=0", "carheight=0",
+                       " boreratio=0"))
+```
+
+
+
+De la salida anterior podemos concluir que:
+
+
+Dado que el valor  $p$ es mucho menor que 0.05, rechazamos la hipótesis nula $H_0$. Esto significa que al menos una de las variables \texttt{carlength}, \texttt{carwidth}, \texttt{carheight} o \texttt{boreratio} tiene un impacto significativo en la variable dependiente (\texttt{price}).
+
+Las variables \texttt{carlength}, \texttt{carwidth}, \texttt{carheight} y \texttt{boreratio} contribuyen significativamente al modelo. Por lo tanto, deben incluirse en el modelo para explicar adecuadamente la variabilidad de la variable dependiente (\texttt{price}).
+
+
 
 ## Punto 5
 
@@ -614,20 +718,15 @@ for (var in variables) {
 
 ```
 
-
-
 Del gráfico anterior podemos decir que
 
-- Los gráficos sugieren que podría haber problemas de varianza no constante (heterocedasticidad), especialmente en los extremos de los valores ajustados y en variables como `boreratio` y `compressionratio`.
+-   Los gráficos sugieren que podría haber problemas de varianza no constante (heterocedasticidad), especialmente en los extremos de los valores ajustados y en variables como `boreratio` y `compressionratio`.
 
-- En variables como `stroke`, el patrón observado podría indicar que una relación no lineal no está siendo capturada.
+-   En variables como `stroke`, el patrón observado podría indicar que una relación no lineal no está siendo capturada.
 
-- Hay algunos puntos extremos que podrían estar influyendo en el modelo.
-
-
+-   Hay algunos puntos extremos (residuales estudentizados vs. Valores ajustados) que podrían estar influyendo en el modelo.
 
 
-\newpage
 
 ## Punto 6
 
@@ -663,6 +762,7 @@ Para esto utilizaremos la función `influencePlot()`.
 influencePlot(mod_cont)
 ```
 
+\newpage
 
 ```{r}
 #| echo: false
@@ -706,26 +806,72 @@ cat("
 
 De la @tbl-diagnostico podemos concluir que:
 
-- Las observaciones 28 y 29 son outliers claros según sus residuales estandarizados y podrían requerir mayor análisis o tratamiento.
+-   Las observaciones 28 y 29 son outliers claros según sus residuales estandarizados y podrían requerir mayor análisis o tratamiento.
+
+-   Las observaciones 30 y 35 aunque no son outliers extremos, tienen valores de leverage moderadamente altos, lo que indica que podrían tener un impacto significativo en el modelo.
 
 
-- Las observaciones 30 y 35 aunque no son outliers extremos, tienen valores de leverage moderadamente altos, lo que indica que podrían tener un impacto significativo en el modelo.
 
+## Punto 8
 
+Suponga que algunas de las observaciones que presentaron problemas en el numeral anterior son por problemas de digitación, elimínelas (no mas de 10) y ajuste el modelo de regresión sin dichas observaciones. Presente solo la tabla de parámetros ajustados resultante ¿Cambian notoriamente las estimaciones de los parámetros, sus errores estandar y/o la signficancia? ¿Que concluye al respecto? Evalué el gráfico de normalidad para los residuales estudentizados para este ajuste ¿mejoro la normalidad? Concluya sobre los efectos de estas observaciones.
+
+```{r}
+#| echo: true
+# Crear un nuevo conjunto de datos sin las filas problemáticas
+data_clean <- var_continuas[-c(28, 29, 30, 35), ]
+# Modelo ajustado sin las observaciones problemáticas
+mod_cont1 <- lm(price ~., data = data_clean)
+```
 
 
 \newpage
 
-## Punto 8
+```{r}
+#| echo: false
+#| label: tbl-parametros1
+#| tbl-cap: Parámetros nuevo ajuste
 
-Suponga que algunas de las observaciones que presentaron problemas en el numeral anterior son por problemas de digitación, elimínelas (no mas de 10) y ajuste el modelo de regresión sin dichas observaciones. Presente solo la tabla de parámetros ajustados resultante ¿Cambian notoriamente las estimaciones de los parámetros, sus errores estandard y/o la signficancia? ¿Que concluye al respecto? Evalue el grafico de normalidad para los residuales estudentizados para este ajuste ¿mejor´o la normalidad? Concluya sobre los efectos de estas observaciones.
-
-
-
-
-
-
+summary(mod_cont1)$coefficients %>% kable(digits = 3)
+```
 
 
+De la @tbl-parametros y @tbl-parametros1 podemos concluir:
+
+Las variables más afectadas por el nuevo ajuste son:
+
+- `carlength`: Aumentó en magnitud y significancia, indicando que las observaciones eliminadas podrían haber reducido su importancia en el modelo original.
+
+- `boreratio`: Mantuvo su relevancia y mostró un leve aumento en magnitud y significancia.
+
+En general, no hubo cambios drásticos en los parámetros, lo que indica que el modelo era relativamente robusto frente a las observaciones eliminadas.
+
+
+- Los errores estándar se mantuvieron similares, lo que sugiere que las eliminaciones no afectaron de manera significativa la estabilidad del modelo.
+
+
+- No se perdieron variables significativas tras el ajuste. De hecho, `carlength` mostró una mayor relevancia en el nuevo modelo.
+
+- Las observaciones eliminadas tenían un impacto limitado en el modelo general, aunque influían ligeramente en la significancia y magnitud de algunas variables clave, como `carlength` y `boreratio`.
+
+\newpage
+
+
+```{r}
+#| echo: false
+#| label: fig-QQ2
+#| fig-cap: "Gráfico Q-Q Residuales Estudentizados (nuevo ajuste)"
+
+
+# Calcular los residuales estudiantizados
+residuales_est1 <- rstudent(mod_cont1)
+
+# Gráfico Q-Q
+qqnorm(residuales_est1)
+qqline(residuales_est1, col = "red")
+```
+
+
+De la @fig-QQ2 vemos que  todavia hay algunos puntos que se alejan signifcativamente de la línea recta (en particular en los extremos), lo cual podemos decir de que no hay mejoria en la normalidad, por lo tanto se podria optar por elimninar esas obervaciones.
 
 
