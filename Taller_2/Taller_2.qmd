@@ -1,30 +1,32 @@
 ---
 lang: es
 format: pdf
+editor: source
 
+execute: 
+  cache: true
 ---
 
-
 \begin{titlepage}
-	\begin{center}
-		{\LARGE \textbf{Universidad Nacional De Colombia}} \\
-		
-		\vspace{4mm}
-		
-		{\Large \textbf{Sede Medellín}}
-		\vspace{0.3cm}
-		\begin{figure}[h]
-			\centering
-		\includegraphics[height=5cm]{logo.jpg}
-		\end{figure}
-	
-	\vspace{1mm}
-	
-	{\LARGE \textbf{Facultad de Ciencias}}
-	\vspace{5mm}
-	
+    \begin{center}
+        {\LARGE \textbf{Universidad Nacional De Colombia}} \\
+        
+        \vspace{4mm}
+        
+        {\Large \textbf{Sede Medellín}}
+        \vspace{0.3cm}
+        \begin{figure}[h]
+            \centering
+        \includegraphics[height=5cm]{logo.jpg}
+        \end{figure}
+    
+    \vspace{1mm}
+    
+    {\LARGE \textbf{Facultad de Ciencias}}
+    \vspace{5mm}
+    
     {\Large Departamento de Estadística}
-	\vspace{1.4cm}
+    \vspace{1.4cm}
 
     {\LARGE\textbf{Taller RML (Parte 2)}}
     \vspace{1.4cm}    
@@ -37,17 +39,14 @@ format: pdf
     
     {\Large \textbf{Juan Gabriel Carvajal Negrete}}
     \vspace{1.4cm}
-	
+    
     {\Large Modelos de Regresión}
-	\vspace{1cm}
+    \vspace{1cm}
     
     {\Large\textbf{Enero, 2025}}
 
-	\end{center}
+    \end{center}
 \end{titlepage}
-
-
-
 
 ```{r}
 #| include: false 
@@ -57,17 +56,16 @@ library(rsm)
 library(rgl)
 library(scatterplot3d)
 library(GGally)
+library(corrplot)
 library(xtable)
 library(magrittr)
 library(glue)
 library(pander)
 library(kableExtra)
+library(knitr)
 library(tidyverse)
+source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/FuncionesdeUsuarioRLM.R")
 ```
-
-
-
-
 
 ```{r}
 # cargue de la base de datos
@@ -76,35 +74,39 @@ datos <- read.csv("boston.csv", header = T, sep = ",", dec = ".")
 datos4 <- datos[401:500,c(1,5,6,7,11,13,14)]
 ```
 
-
-
 # Punto 1
 
 Realice diagnosticos de multicolinealidad mediante.
 
-
 ## Literal a)
 
+Matriz de correlación de las variables predictoras.
 
-Matriz de correlación de las variables predictoras
+```{r}
+#| echo: false
 
+corr <- cor(datos4[,-7], method = "pearson")
 
+corrplot(corr,
+         method = "circle",            
+         type = "upper",               
+         tl.col = "black",             
+         tl.srt = 45,                  
+         number.cex = 1.2,             
+         addCoef.col = "black",        
+         col = colorRampPalette(c("red", "white", "blue"))(200),
+         diag = FALSE)
+```
 
+## Literal b)
 
+VIF's
 
+```{r}
+#| message: false
 
+# Ajuste del modelo de regresion
+modelo <- lm(MEDV ~. , data = datos4)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+miscoeficientes(modelo)[4] |> kable(aling = c('lc'))
+```

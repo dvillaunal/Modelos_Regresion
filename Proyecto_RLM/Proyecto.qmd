@@ -76,9 +76,6 @@ source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/Funci
     \end{center}
 \end{titlepage}
 
-
-
-
 # Contexto de los datos
 
 ## Planteamiento de Problema
@@ -266,7 +263,7 @@ De la @fig-corr se pueden extraer las siguientes conclusiones:
 
 -   Las variables que tienen una mayor relacion lineal con el precio son : `enginesize` ($r=0.87$), `curbweight` ($r = 0.84$) , `horsepower` ($r = 0.81$) y `carwidth` ($r= 0.76$).
 
--   Hay pares de variables que tienen correlacion alta como `Enginesize` y `horsepower`: 0.8098 ,` Wheelbase` y `carlength`: 0.8746 , `Carlength` y `curbweight`: 0.8777 por lo que posiblemente no sea útil introducir algunas pares de variables en el modelo para evitar multicolinealidad.
+-   Hay pares de variables que tienen correlacion alta como `Enginesize` y `horsepower`: 0.8098 ,`Wheelbase` y `carlength`: 0.8746 , `Carlength` y `curbweight`: 0.8777 por lo que posiblemente no sea útil introducir algunas pares de variables en el modelo para evitar multicolinealidad.
 
 \newpage
 
@@ -290,10 +287,7 @@ datos %>% count(company_name) %>%
     legend.position = "none")
 ```
 
-
-
 De la @fig-empresa, observamos que la mayoria de los carros en este conjunto de datos está dominado por unas pocas marcas, especialmente Toyota, que supera ampliamente a las demás,por lo tanto, podemos decir que Toyota es la empresa preferida de los clientes.
-
 
 \newpage
 
@@ -362,7 +356,6 @@ datos %>% ggplot(aes(x = carwidth, y = price)) +
 
 De la @fig-disp se observa claramente que la longitud y la anchura del carro están estrechamente relacionadas con su precio.A medida que aumentan la longitud y la anchura del carro, también tiende a aumentar su precio.Sin embargo, no es posible hacer inferencias claras basadas únicamente en la relación entre la longitud y el precio, debido a la alta dispersión de los datos.La altura del carro no parece tener un impacto significativo en el precio.
 
-
 \newpage
 
 ```{r}
@@ -388,14 +381,9 @@ datos %>% ggplot(aes(x = highwaympg, y = price)) +
       theme_minimal()
 ```
 
-
-
-
 De la @fig-disp2 se observa claramente que `citympg` y `highwaympg` tienen una correlación negativa con el precio del carro. A medida que aumentan los valores de `citympg` y `highwaympg`, el precio del carro tiende a disminuir. Dado que ambas características están relacionadas con el precio de manera significativa, `citympg` y `highwaympg` son características útiles para predecir el precio de los carros.
 
-
 \newpage
-
 
 ```{r}
 #| layout-ncol: 2
@@ -421,8 +409,6 @@ datos %>% ggplot(aes(x = curbweight, y = price)) +
 ```
 
 De la @fig-disp3 se observa claramente que el peso del carro en vacío tiene una alta correlación ($0.84$) con el precio del carro. A medida que aumenta el peso en vacío, el precio del carro también incrementa de manera significativa. Aunque la distancia entre ejes y el precio no presentan una correlación tan alta, todavía existe una relación positiva. Por lo tanto, un aumento en la distancia entre ejes también está asociado con un incremento en el precio del carro.
-
-
 
 ```{r}
 #| layout-ncol: 2
@@ -486,8 +472,6 @@ datos %>%
 ```
 
 De la @fig-bar2 observamos que la mayoría de los carros vendidos tienen motores de árbol de levas en cabeza (OHC).Solo se ha vendido un carro con motor DOHCV, y existen muy pocos datos disponibles para los motores DOHCV y de rotor. Los carros con motores DOHCV son, en su mayoría, más caros. Por otro lado, los carros con motores OHC son los menos costosos.
-
-
 
 ```{r}
 #| layout-ncol: 2
@@ -566,8 +550,6 @@ Del resultado de la tabla anova podemos concluir que
     \item El modelo explica el \( 62.48\% \) de la variabilidad en los precios, lo que lo convierte en un modelo razonablemente efectivo, aunque con espacio para mejorar.
 \end{itemize}
 
-
-
 ## Punto 2
 
 Calcule los coeficientes de regresión estandarizados y concluya acerca de cual de las variables aporta mas a la respuesta según la magnitud en valor absoluto de tales coeficientes (cuidado, no confunda esto con la significancia de los coeficientes de regresión).
@@ -586,9 +568,9 @@ miscoeficientes(mod_cont)[c(1,5)] %>% kable()
 
 De la @tbl-parametros2 podemos concluir con respecto a los coeficientes estandarizados.
 
-- La variable `carwidth` es, con diferencia, la variable que tiene el mayor aporte a la respuesta, según la magnitud absoluta.
+-   La variable `carwidth` es, con diferencia, la variable que tiene el mayor aporte a la respuesta, según la magnitud absoluta.
 
-- Las variables `compressionratio` y `stroke` aportan muy poco a la respuesta.
+-   Las variables `compressionratio` y `stroke` aportan muy poco a la respuesta.
 
 ## Punto 3
 
@@ -614,25 +596,21 @@ De la @tbl-parametros observamos las variables `carlength` , `carwidth`, `carhei
 
 Teniendo en cuenta los resultados anteriores, realice una prueba con sumas de cuadrados extras con test lineal general; especifique claramente el modelo reducido y completo, estadístico de la prueba, su distribución, cálculo de valor P, decisión y conclusión a la luz de los datos. Justifique la hipótesis que desea probar en este numeral.
 
-
 Teniendo encuenta el resultado anterior tenemos que la hipotesis a probar es:
-
 
 \begin{itemize}
     \item \( H_0 \): Las variables significativas identificadas en la Tabla 1 (\texttt{carlength}, \texttt{carwidth}, \texttt{carheight} y \texttt{boreratio}) no contribuyen significativamente al modelo.
     \item \( H_1 \): Al menos una de estas variables contribuye significativamente al modelo.
 \end{itemize}
 
-
 El modelo completo(MF):
 
 \begin{align*}  
 Y_i = \beta_0 + \beta_1 \text{\texttt{wheelbase}} + \beta_2 \text{\texttt{carlength}} + \beta_3 \text{\texttt{carwidth}} + \beta_4 \text{\texttt{carheight}} + \\ \beta_5
 \text{\texttt{boreratio}} + \beta_6 \text{\texttt{stroke}} + \beta_7 \text{\texttt{compressionratio}} + \epsilon
-\end{align*}  
-    
+\end{align*}
 
-El modeloreducido(MR): 
+El modeloreducido(MR):
 
 \begin{equation*}
 Y_i = \beta_0 + \beta_1 \text{\texttt{wheelbase}} + \beta_6 \text{\texttt{stroke}} + \beta_7 \text{\texttt{compressionratio}} + \epsilon
@@ -658,8 +636,6 @@ Y_i = \beta_0 + \beta_1 \text{\texttt{wheelbase}} + \beta_6 \text{\texttt{stroke
     \]
 \end{itemize}
 
-
-
 ```{r}
 
 # Ajuste del modelo completo
@@ -671,16 +647,11 @@ linearHypothesis(MF, c("carlength=0", "carwidth=0", "carheight=0",
                        " boreratio=0"))
 ```
 
-
-
 De la salida anterior podemos concluir que:
 
-
-Dado que el valor  $p$ es mucho menor que 0.05, rechazamos la hipótesis nula $H_0$. Esto significa que al menos una de las variables \texttt{carlength}, \texttt{carwidth}, \texttt{carheight} o \texttt{boreratio} tiene un impacto significativo en la variable dependiente (\texttt{price}).
+Dado que el valor $p$ es mucho menor que 0.05, rechazamos la hipótesis nula $H_0$. Esto significa que al menos una de las variables \texttt{carlength}, \texttt{carwidth}, \texttt{carheight} o \texttt{boreratio} tiene un impacto significativo en la variable dependiente (\texttt{price}).
 
 Las variables \texttt{carlength}, \texttt{carwidth}, \texttt{carheight} y \texttt{boreratio} contribuyen significativamente al modelo. Por lo tanto, deben incluirse en el modelo para explicar adecuadamente la variabilidad de la variable dependiente (\texttt{price}).
-
-
 
 ## Punto 5
 
@@ -725,8 +696,6 @@ Del gráfico anterior podemos decir que
 -   En variables como `stroke`, el patrón observado podría indicar que una relación no lineal no está siendo capturada.
 
 -   Hay algunos puntos extremos (residuales estudentizados vs. Valores ajustados) que podrían estar influyendo en el modelo.
-
-
 
 ## Punto 6
 
@@ -810,8 +779,6 @@ De la @tbl-diagnostico podemos concluir que:
 
 -   Las observaciones 30 y 35 aunque no son outliers extremos, tienen valores de leverage moderadamente altos, lo que indica que podrían tener un impacto significativo en el modelo.
 
-
-
 ## Punto 8
 
 Suponga que algunas de las observaciones que presentaron problemas en el numeral anterior son por problemas de digitación, elimínelas (no mas de 10) y ajuste el modelo de regresión sin dichas observaciones. Presente solo la tabla de parámetros ajustados resultante ¿Cambian notoriamente las estimaciones de los parámetros, sus errores estandar y/o la signficancia? ¿Que concluye al respecto? Evalué el gráfico de normalidad para los residuales estudentizados para este ajuste ¿mejoro la normalidad? Concluya sobre los efectos de estas observaciones.
@@ -824,7 +791,6 @@ data_clean <- var_continuas[-c(28, 29, 30, 35), ]
 mod_cont1 <- lm(price ~., data = data_clean)
 ```
 
-
 \newpage
 
 ```{r}
@@ -835,27 +801,23 @@ mod_cont1 <- lm(price ~., data = data_clean)
 summary(mod_cont1)$coefficients %>% kable(digits = 3)
 ```
 
-
 De la @tbl-parametros y @tbl-parametros1 podemos concluir:
 
 Las variables más afectadas por el nuevo ajuste son:
 
-- `carlength`: Aumentó en magnitud y significancia, indicando que las observaciones eliminadas podrían haber reducido su importancia en el modelo original.
+-   `carlength`: Aumentó en magnitud y significancia, indicando que las observaciones eliminadas podrían haber reducido su importancia en el modelo original.
 
-- `boreratio`: Mantuvo su relevancia y mostró un leve aumento en magnitud y significancia.
+-   `boreratio`: Mantuvo su relevancia y mostró un leve aumento en magnitud y significancia.
 
 En general, no hubo cambios drásticos en los parámetros, lo que indica que el modelo era relativamente robusto frente a las observaciones eliminadas.
 
+-   Los errores estándar se mantuvieron similares, lo que sugiere que las eliminaciones no afectaron de manera significativa la estabilidad del modelo.
 
-- Los errores estándar se mantuvieron similares, lo que sugiere que las eliminaciones no afectaron de manera significativa la estabilidad del modelo.
+-   No se perdieron variables significativas tras el ajuste. De hecho, `carlength` mostró una mayor relevancia en el nuevo modelo.
 
-
-- No se perdieron variables significativas tras el ajuste. De hecho, `carlength` mostró una mayor relevancia en el nuevo modelo.
-
-- Las observaciones eliminadas tenían un impacto limitado en el modelo general, aunque influían ligeramente en la significancia y magnitud de algunas variables clave, como `carlength` y `boreratio`.
+-   Las observaciones eliminadas tenían un impacto limitado en el modelo general, aunque influían ligeramente en la significancia y magnitud de algunas variables clave, como `carlength` y `boreratio`.
 
 \newpage
-
 
 ```{r}
 #| echo: false
@@ -871,7 +833,4 @@ qqnorm(residuales_est1)
 qqline(residuales_est1, col = "red")
 ```
 
-
-De la @fig-QQ2 vemos que  todavia hay algunos puntos que se alejan signifcativamente de la línea recta (en particular en los extremos), lo cual podemos decir de que no hay mejoria en la normalidad, por lo tanto se podria optar por elimninar esas obervaciones.
-
-
+De la @fig-QQ2 vemos que todavia hay algunos puntos que se alejan signifcativamente de la línea recta (en particular en los extremos), lo cual podemos decir de que no hay mejoria en la normalidad, por lo tanto se podria optar por elimninar esas obervaciones.
