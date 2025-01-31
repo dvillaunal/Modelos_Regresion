@@ -1,6 +1,11 @@
 ---
 lang: es
-format: pdf
+format: 
+  pdf:
+    documentclass: article
+    include-in-header:
+      - file: preamble.tex
+highlight-style: tango
 editor: source
 
 execute: 
@@ -52,8 +57,13 @@ execute:
 #| include: false 
 #| warning: false
 library(car)
+library(leaps)
+library(pls)
+library(scales)
+library(olsrr)
 library(rsm)
 library(rgl)
+library(glmnet)
 library(scatterplot3d)
 library(GGally)
 library(corrplot)
@@ -67,7 +77,29 @@ library(tidyverse)
 source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/FuncionesdeUsuarioRLM.R")
 ```
 
+Primeramente recordaremos el contexto de la base de datos y las covariables a ser incluidas para el análisis de nuestro grupo.
+
+El conjunto de datos `boston.csv` contiene información recopilada por el Servicio del Censo de EE. UU. con respecto a la vivienda en el área de Boston,Massachusetts.
+
+Las variables a incluir en el análisis son:
+
+-   `CRIM`: tasa de criminalidad per cápita por ciudad.
+
+-   `NOX`: concentración de óxidos nítricos (partes por 10 millones).
+
+-   `RM`: Número medio de habitaciones por vivienda.
+
+-   `AGE`: Proporción de unidades ocupadas por el propietario construidas antes de 1940.
+
+-   `PTRATIO`: Proporción de alumnos por profesor por ciudad.
+
+-   `LSTAT`: Porcentaje de población con nivel socio-económico bajo.
+
+-   `MEDV`: Valor medio de las viviendas ocupadas por el propietario en \$1000.
+
 ```{r}
+#| echo: false
+
 # cargue de la base de datos
 
 datos <- read.csv("boston.csv", header = T, sep = ",", dec = ".")
@@ -76,14 +108,23 @@ datos4 <- datos[401:500,c(1,5,6,7,11,13,14)]
 
 # Punto 1
 
-Realice diagnosticos de multicolinealidad mediante.
+Realice diagnósticos de multicolinealidad mediante.
 
-## Literal a)
-
-Matriz de correlación de las variables predictoras.
+## a) Matriz de correlación de las variables predictoras.
 
 ```{r}
 #| echo: false
+#| label: tbl-cor
+#| tbl-cap: "Matriz de Correlaciones"
+
+
+correlaciones(datos4[,-7]) %>% kable(align = c('lc'))
+```
+
+```{r}
+#| echo: false
+#| label: fig-corplot
+#| fig-cap: "Gráfico de Correlaciones" 
 
 corr <- cor(datos4[,-7], method = "pearson")
 
@@ -98,15 +139,306 @@ corrplot(corr,
          diag = FALSE)
 ```
 
-## Literal b)
+De acuerdo a @tbl-cor y @fig-corplot concluimos que no hay evidencia clara de multicolinealidad severa.
 
-VIF's
+## b) VIF's
 
 ```{r}
-#| message: false
+#| echo: false
+#| label: tbl-vifs
+#| tbl-cap: "Factores de inflación de varianza (VIF) para las variables predictoras del modelo"
 
 # Ajuste del modelo de regresion
 modelo <- lm(MEDV ~. , data = datos4)
 
-miscoeficientes(modelo)[4] |> kable(aling = c('lc'))
+miscoeficientes(modelo)[4] %>% kable()
+```
+
+Según la @tbl-vifs la multicolinealidad no parece ser un problema significativo en este conjunto de datos según los valores de VIF.
+
+## c) Indice de condición
+
+Para calcular en indice de condición tendremos en cuenta centrar los datos (Montgomeryet.al.,2021) ya que intercepto solo tendrá una interpretación útil si los valores de las variables independientes igual a cero tienen sentido en el contexto del conjunto de datos. En este caso particular, dado que algunas variables como `RM` número promedio de habitaciones), no tienen sentido físico o práctico como cero, ya que una casa no puede tener cero habitaciones, por tanto el intercepto no tendría una interpretación práctica clara.
+
+```{r}
+#| echo: false
+#| label: tbl-ic
+#| tbl-cap: "Índice de condición para las variables predictoras del modelo"
+
+
+multicolin(modelo, center = TRUE)[4] %>% kable(align = c('c'))
+```
+
+Según la @tbl-ic todos los valores del índice de condición están muy por debajo de 10, lo que indica que no hay problemas significativos de multicolinealidad entre las variables predictoras.
+
+## d) Proporciones de varianza.
+
+Para el criterio de proporciones de varianza tambien se hizo lo expuesto en el criterio anterior (Indice de condición).
+
+```{r}
+#| echo: false
+#| label: tbl-pv
+#| tbl-cap: "Proporciones de varianza para las variables predictoras del modelo"
+
+
+multicolin(modelo, center = TRUE)[,c(3,5,6,7,8,9,10)] %>% 
+  kable(align = c('ccccccc'), digits = 4)
+```
+
+Según la @tbl-pv no hay proporciones $\pi_{ij}$ altas $(> 0.5)$ para dos o más coeficientes de regresión asociados con un mismo valor propio pequeño, por tanto no hay evidencia de multicolinealidad entre las variables correspondientes a tales coeficientes.
+
+# Punto 2
+
+Construya modelos de regresión utilizando los métodos de selección (muestre de cada método solo la tabla de resumen de este y la tabla ANOVA y la de parámetros estimados del modelo finalmente resultante):
+
+## a) Selección según el $R^2_\text{adj}$
+
+```{r}
+#| echo: false
+#| label: tbl-Radj
+#| tbl-cap: "Selección de Modelos según el Estadístico $R^2_{adj}$"
+
+# Generar todos los modelos posibles
+k <- ols_step_all_possible(modelo)
+
+# Mejor modelo segun R2 adj
+k$result %>% select(predictors, adjr) %>% arrange(-adjr) %>% head() %>% 
+  kable(digits = 3, align = c('lc'))
+```
+
+\newpage
+
+Según la @tbl-Radj podemos concluir que:
+
+-   El modelo con las variables predictoras `CRIM`, `NOX`y `LSTAT` es el mejor segund el $R^2_{adj}$ ya que maximiza este estadístico con un número mínimo de predictores.
+
+-   La inclusión de más variables predictoras como `PTRATIO` o `AGE` no parece justificar un mejor desempeño,ya que el $R^2_{adj}$ no mejora sustancialmente.
+
+## b) Selección según el estadístico $C_p$.
+
+Selección según el estadístico $C_p$.
+
+```{r}
+#| echo: false
+#| label: tbl-cp
+#| tbl-cap: "Selección de Modelos según el Estadístico $C_p$"
+
+
+# Mejor modelo segun Cp
+
+k$result %>% select(predictors, cp) %>% arrange(cp) %>% head() %>% 
+  kable(digits = 3, align = c('lc'))
+```
+
+Según la @tbl-cp el mejor modelo, según el criterio $C_p$ es con las variables predictoras `CRIM`, `NOX`, `LSTAT`.
+
+## c) Stepwise
+
+```{r}
+
+```
+
+| Paso | Variable Agregada |   AIC   |   R²    | R² Ajustado |
+|------|:-----------------:|:-------:|:-------:|:-----------:|
+| 0    |    Base Model     | 621.008 | 0.00000 |   0.00000   |
+| 1    |     LSTAT (+)     | 559.176 | 0.47182 |   0.46643   |
+| 2    |      NOX (+)      | 543.986 | 0.55524 |   0.54607   |
+| 3    |     CRIM (+)      | 535.404 | 0.59990 |   0.58740   |
+
+: Resumen Stepwise {#tbl-stepwise}
+
+De la @tbl-stepwise podemos conluir que el modelo final selecciona LSTAT, NOX, y CRIM como las variables predictoras más relevantes.
+
+| Fuente    | Suma de Cuadrados | DF  | Media Cuadrática | F     | Significancia |
+|-----------|:-----------------:|:---:|:----------------:|-------|:-------------:|
+| Regresión |     1679.722      |  3  |     559.907      | 47.98 |    0.0000     |
+| Residual  |     1120.278      | 96  |      11.670      |       |               |
+| Total     |     2800.000      | 99  |                  |       |               |
+
+: ANOVA Stepwise {#tbl-stepwise_anova}
+
+De la @tbl-stepwise_anova podemos concluir que el modelo es significativo y explica una gran parte de la variación total en MEDV.
+
+| Variable    | Beta    | Std. Error | Std. Beta | t      | Significancia | Inferior | Superior |
+|---------|---------|---------|---------|---------|---------|---------|---------|
+| (Intercept) | 40.703  | 3.495      |           | 11.646 | 0.000         | 33.765   | 47.640   |
+| LSTAT       | -0.488  | 0.068      | -0.516    | -7.201 | 0.000         | -0.622   | -0.353   |
+| NOX         | -23.187 | 5.663      | -0.283    | -4.094 | 0.000         | -34.428  | -11.946  |
+| CRIM        | -0.095  | 0.029      | -0.225    | -3.274 | 0.001         | -0.153   | -0.037   |
+
+: Parámetros estimados del modelo final Stepwise {#tbl-stepwise_parametros}
+
+Todas las variables predictoras seleccionadas tienen un impacto significativo y negativo en MEDV.
+
+## d) Selección hacia adelante o \textit{forward}
+
+```{r}
+ols_step_forward_p(modelo,p_val=0.05,details =TRUE)
+```
+
+| Paso | Variable Agregada |   AIC   |   R²    | R² Ajustado |
+|------|:-----------------:|:-------:|:-------:|:-----------:|
+| 0    |    Base Model     | 621.008 | 0.00000 |   0.00000   |
+| 1    |       LSTAT       | 559.176 | 0.47182 |   0.46643   |
+| 2    |        NOX        | 543.986 | 0.55524 |   0.54607   |
+| 3    |       CRIM        | 535.404 | 0.59990 |   0.58740   |
+
+: Resumen Forward {#tbl-forward}
+
+| Fuente    | Suma de Cuadrados | DF  | Media Cuadrática |   F   | p-valor |
+|-----------|:-----------------:|:---:|:----------------:|:-----:|:-------:|
+| Regresión |     1679.722      |  3  |     559.907      | 47.98 | 0.0000  |
+| Residual  |     1120.278      | 96  |      11.670      |       |         |
+| Total     |     2800.000      | 99  |                  |       |         |
+
+: ANOVA Forward {#tbl-forward_anova}
+
+| Variable    |  Beta   | Std. Error | Std. Beta |   t    | p-valor | Inferior | Superior |
+|:--------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+| (Intercept) | 40.703  |   3.495    |           | 11.646 |  0.000  |  33.765  |  47.640  |
+| LSTAT       | -0.488  |   0.068    |  -0.516   | -7.201 |  0.000  |  -0.622  |  -0.353  |
+| NOX         | -23.187 |   5.663    |  -0.283   | -4.094 |  0.000  | -34.428  | -11.946  |
+| CRIM        | -0.095  |   0.029    |  -0.225   | -3.274 |  0.001  |  -0.153  |  -0.037  |
+
+: Parámetros estimados del modelo final Forward {#tbl-forward_parametros}
+
+## e) Selección hacia atrás o \textit{backward}
+
+```{r}
+ols_step_backward_p(modelo,p_val=0.05,details = TRUE) # Selección backward
+```
+
+| Paso | Variable Eliminada |   AIC   |   R²    | R² Ajustado |
+|------|:------------------:|:-------:|:-------:|:-----------:|
+| 0    |     Full Model     | 540.494 | 0.60353 |   0.57795   |
+| 1    |         RM         | 538.608 | 0.60307 |   0.58196   |
+| 2    |        AGE         | 536.769 | 0.60243 |   0.58569   |
+| 3    |      PTRATIO       | 535.404 | 0.59990 |   0.58740   |
+
+<!-- caption -->
+
+| Fuente    | Suma de Cuadrados | DF  | Media Cuadrática | F     | p-valor |
+|:----------|-------------------|-----|------------------|-------|---------|
+| Regresión | 1679.722          | 3   | 559.907          | 47.98 | 0.0000  |
+| Residual  | 1120.278          | 96  | 11.670           |       |         |
+| Total     | 2800.000          | 99  |                  |       |         |
+
+<!-- caption -->
+
+| Variable    |  Beta   | Std. Error | Std. Beta |   t    | p-valor | Inferior | Superior |
+|:--------|:-------:|:-------:|---------|:-------:|:-------:|:-------:|:-------:|
+| (Intercept) | 40.703  |   3.495    |           | 11.646 |  0.000  |  33.765  |  47.640  |
+| CRIM        | -0.095  |   0.029    | -0.225    | -3.274 |  0.001  |  -0.153  |  -0.037  |
+| NOX         | -23.187 |   5.663    | -0.283    | -4.094 |  0.000  | -34.428  | -11.946  |
+| LSTAT       | -0.488  |   0.068    | -0.516    | -7.201 |  0.000  |  -0.622  |  -0.353  |
+
+<!-- caption -->
+
+# Punto 3
+
+Realice el ajuste utilizando los métodos RR y LASSO. Compare los resultados y comente.
+
+## Regresión Ridge
+
+```{r}
+# Creando matriz de diseño
+
+X <- as.matrix(model.matrix(modelo))[,-1]
+y <- datos4$MEDV
+
+# Ajuste del modelo de regresion ridge
+
+model_ridge <- glmnet(X, y, alpha = 0)
+```
+
+Para identificar el valor de **kappa** que da lugar al mejor modelo,recurriremos a validación cruzada con la función `cv.glmnet()`.
+
+```{r}
+set.seed(21)
+cv_model <- cv.glmnet(X, y, alpha = 0) # encontrado el mejor kappa
+```
+
+```{r}
+#| echo: false
+
+# Mejor valor lambda encontrado
+# =========================================================================
+paste("Mejor valor de kappa encontrado:", cv_model$lambda.min)
+```
+
+```{r}
+# Mejor modelo lambda óptimo + 1sd
+# ========================================================================
+mejor_modelo_rr <- glmnet(X, y, alpha = 0,lambda = cv_model$lambda.min)
+
+```
+
+```{r}
+# Predicciones modelo de regresion ridge
+# ==============================================================================
+predicciones_rr <- predict(mejor_modelo_rr, newx = X)
+```
+
+```{r}
+#| echo: false
+
+# MSE modelo de regresion ridge
+
+mse_rr <- mean((predicciones_rr - y)^2)
+paste("Error (mse) modelo ridge:", mse_rr)
+```
+
+## Regresión Lasso
+
+```{r}
+# Ajuste del modelo de regresion lasso
+
+model_lasso <- glmnet(X, y, alpha = 1)
+```
+
+Para identificar el valor de **kappa** que da lugar al mejor modelo,recurriremos a validación cruzada con la función `cv.glmnet()`.
+
+```{r}
+set.seed(64)
+cv_model <- cv.glmnet(X, y, alpha = 1) # encontrado el mejor kappa
+```
+
+```{r}
+#| echo: false
+
+# Mejor valor lambda encontrado
+
+paste("Mejor valor de kappa encontrado:", cv_model$lambda.min)
+```
+
+```{r}
+# Mejor modelo kappa óptimo 
+
+mejor_model_lasso <- glmnet(X, y, alpha = 1,lambda = cv_model$lambda.min)
+```
+
+```{r}
+# Predicciones modelo de regresion ridge
+
+predicciones_lasso <- predict(mejor_model_lasso, newx = X)
+```
+
+```{r}
+#| echo: false
+
+# MSE modelo de regresion ridge
+
+mse_lasso <- mean((predicciones_lasso - y)^2)
+paste("Error (mse) modelo lasso:", mse_lasso)
+```
+
+# Punto 4
+
+Realice el ajuste PCR y comente.
+
+```{r}
+# División de los datos en train y test
+
+entrenamiento <- datos4[401:480, ]
+prueba <- datos4[481:500, ]
 ```

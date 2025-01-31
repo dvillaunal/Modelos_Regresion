@@ -21,3 +21,9 @@ stringr
 forcats
 lubridate
 knitr
+leaps
+olsrr
+scales
+Matrix
+glmnet
+pls
