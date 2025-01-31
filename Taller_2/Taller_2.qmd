@@ -3,9 +3,8 @@ lang: es
 format: 
   pdf:
     documentclass: article
-    include-in-header:
-      - file: preamble.tex
-highlight-style: tango
+    geometry: margin=1in
+highlight-style: github
 editor: source
 
 execute: 
@@ -160,6 +159,8 @@ Según la @tbl-vifs la multicolinealidad no parece ser un problema significativo
 
 Para calcular en indice de condición tendremos en cuenta centrar los datos (Montgomeryet.al.,2021) ya que intercepto solo tendrá una interpretación útil si los valores de las variables independientes igual a cero tienen sentido en el contexto del conjunto de datos. En este caso particular, dado que algunas variables como `RM` número promedio de habitaciones), no tienen sentido físico o práctico como cero, ya que una casa no puede tener cero habitaciones, por tanto el intercepto no tendría una interpretación práctica clara.
 
+\newpage
+
 ```{r}
 #| echo: false
 #| label: tbl-ic
@@ -235,7 +236,9 @@ Según la @tbl-cp el mejor modelo, según el criterio $C_p$ es con las variables
 ## c) Stepwise
 
 ```{r}
-
+#| eval: false
+#| include: false
+ols_step_both_p(modelo, details = TRUE)
 ```
 
 | Paso | Variable Agregada |   AIC   |   R²    | R² Ajustado |
@@ -247,7 +250,7 @@ Según la @tbl-cp el mejor modelo, según el criterio $C_p$ es con las variables
 
 : Resumen Stepwise {#tbl-stepwise}
 
-De la @tbl-stepwise podemos conluir que el modelo final selecciona LSTAT, NOX, y CRIM como las variables predictoras más relevantes.
+
 
 | Fuente    | Suma de Cuadrados | DF  | Media Cuadrática | F     | Significancia |
 |-----------|:-----------------:|:---:|:----------------:|-------|:-------------:|
@@ -257,7 +260,7 @@ De la @tbl-stepwise podemos conluir que el modelo final selecciona LSTAT, NOX, y
 
 : ANOVA Stepwise {#tbl-stepwise_anova}
 
-De la @tbl-stepwise_anova podemos concluir que el modelo es significativo y explica una gran parte de la variación total en MEDV.
+
 
 | Variable    | Beta    | Std. Error | Std. Beta | t      | Significancia | Inferior | Superior |
 |---------|---------|---------|---------|---------|---------|---------|---------|
@@ -268,11 +271,13 @@ De la @tbl-stepwise_anova podemos concluir que el modelo es significativo y expl
 
 : Parámetros estimados del modelo final Stepwise {#tbl-stepwise_parametros}
 
-Todas las variables predictoras seleccionadas tienen un impacto significativo y negativo en MEDV.
+
 
 ## d) Selección hacia adelante o \textit{forward}
 
 ```{r}
+#| eval: false
+#| include: false
 ols_step_forward_p(modelo,p_val=0.05,details =TRUE)
 ```
 
@@ -305,7 +310,9 @@ ols_step_forward_p(modelo,p_val=0.05,details =TRUE)
 ## e) Selección hacia atrás o \textit{backward}
 
 ```{r}
-ols_step_backward_p(modelo,p_val=0.05,details = TRUE) # Selección backward
+#| eval: false
+#| include: false
+ols_step_backward_p(modelo,p_val=0.05,details = TRUE)
 ```
 
 | Paso | Variable Eliminada |   AIC   |   R²    | R² Ajustado |
@@ -315,7 +322,7 @@ ols_step_backward_p(modelo,p_val=0.05,details = TRUE) # Selección backward
 | 2    |        AGE         | 536.769 | 0.60243 |   0.58569   |
 | 3    |      PTRATIO       | 535.404 | 0.59990 |   0.58740   |
 
-<!-- caption -->
+: Resumen Backward {#tbl-backward}
 
 | Fuente    | Suma de Cuadrados | DF  | Media Cuadrática | F     | p-valor |
 |:----------|-------------------|-----|------------------|-------|---------|
@@ -323,7 +330,7 @@ ols_step_backward_p(modelo,p_val=0.05,details = TRUE) # Selección backward
 | Residual  | 1120.278          | 96  | 11.670           |       |         |
 | Total     | 2800.000          | 99  |                  |       |         |
 
-<!-- caption -->
+: ANOVA Backward {#tbl-backward_anova}
 
 | Variable    |  Beta   | Std. Error | Std. Beta |   t    | p-valor | Inferior | Superior |
 |:--------|:-------:|:-------:|---------|:-------:|:-------:|:-------:|:-------:|
@@ -332,7 +339,17 @@ ols_step_backward_p(modelo,p_val=0.05,details = TRUE) # Selección backward
 | NOX         | -23.187 |   5.663    | -0.283    | -4.094 |  0.000  | -34.428  | -11.946  |
 | LSTAT       | -0.488  |   0.068    | -0.516    | -7.201 |  0.000  |  -0.622  |  -0.353  |
 
-<!-- caption -->
+: Parámetros estimados del modelo final Backward {#tbl-backward_parametros}
+
+De los tres métodos de selección podemos concluir que:
+
+- Los tres métodos seleccionaron las mismas tres variables (LSTAT, NOX y CRIM), lo que sugiere que estas son las más relevantes para predecir MEDV.
+
+-   Los tres métodos seleccionaron el mismo modelo final, lo que confirma la estabilidad y robustez del proceso de selección.
+
+-   El modelo final es significativo y bien ajustado, con un $R^2$ ajustado de 0.587 y un $AIC$ mínimo de 535.404.
+
+-   Las variables clave (LSTAT, NOX y CRIM) tienen un impacto negativo en MEDV, indicando que el nivel socio-económico, la contaminación y la criminalidad son determinantes en los precios de la vivienda. Dado el desempeño similar de los métodos, cualquiera de ellos es válido, pero **Stepwise** combinado puede considerarse el más flexible al evaluar tanto adiciones como eliminaciones de variables en el proceso.
 
 # Punto 3
 
@@ -354,8 +371,11 @@ model_ridge <- glmnet(X, y, alpha = 0)
 Para identificar el valor de **kappa** que da lugar al mejor modelo,recurriremos a validación cruzada con la función `cv.glmnet()`.
 
 ```{r}
+#| echo: false
+
+
 set.seed(21)
-cv_model <- cv.glmnet(X, y, alpha = 0) # encontrado el mejor kappa
+cv_model_rr <- cv.glmnet(X, y, alpha = 0) # encontrado el mejor kappa
 ```
 
 ```{r}
@@ -363,82 +383,191 @@ cv_model <- cv.glmnet(X, y, alpha = 0) # encontrado el mejor kappa
 
 # Mejor valor lambda encontrado
 # =========================================================================
-paste("Mejor valor de kappa encontrado:", cv_model$lambda.min)
+paste("Mejor valor de kappa encontrado:", cv_model_rr$lambda.min)
 ```
 
-```{r}
-# Mejor modelo lambda óptimo + 1sd
-# ========================================================================
-mejor_modelo_rr <- glmnet(X, y, alpha = 0,lambda = cv_model$lambda.min)
+Ahora ajustamos el modelo de regresión ridge nuevamente con el valor de kappa optimo.
 
+\newpage
+
+```{r}
+#| eval: false
+#| include: false
+# Mejor modelo con el kappa óptimo
+mejor_model_rr <- glmnet(X, y, alpha = 0,lambda = cv_model_rr$lambda.min)
+coef.glmnet(mejor_model_rr)
 ```
 
+| Variable    | Coeficientes |
+|-------------|--------------|
+| (Intercept) | 55.64931433  |
+| CRIM        | -0.07570871  |
+| NOX         | -19.09952447 |
+| RM          | 0.55650949   |
+| AGE         | -0.03113410  |
+| PTRATIO     | -1.03489490  |
+| LSTAT       | -0.36365557  |
+
+: Coeficientes regresión ridge con el mejor kappa {#tbl-coef_rr}
+
 ```{r}
+#| echo: false
+
 # Predicciones modelo de regresion ridge
-# ==============================================================================
-predicciones_rr <- predict(mejor_modelo_rr, newx = X)
+predicciones_rr <- predict(model_ridge, 
+                           s = cv_model_rr$lambda.min,
+                           newx = X)
 ```
 
 ```{r}
 #| echo: false
 
-# MSE modelo de regresion ridge
-
+# MSE mejor modelo de regresion ridge
 mse_rr <- mean((predicciones_rr - y)^2)
-paste("Error (mse) modelo ridge:", mse_rr)
+paste("Error (mse) mejor modelo ridge:", mse_rr)
 ```
 
 ## Regresión Lasso
 
 ```{r}
 # Ajuste del modelo de regresion lasso
-
 model_lasso <- glmnet(X, y, alpha = 1)
 ```
 
 Para identificar el valor de **kappa** que da lugar al mejor modelo,recurriremos a validación cruzada con la función `cv.glmnet()`.
 
 ```{r}
+#| echo: false
 set.seed(64)
-cv_model <- cv.glmnet(X, y, alpha = 1) # encontrado el mejor kappa
+cv_model_lasso <- cv.glmnet(X, y, alpha = 1) # encontrado el mejor kappa
 ```
 
 ```{r}
 #| echo: false
 
-# Mejor valor lambda encontrado
-
-paste("Mejor valor de kappa encontrado:", cv_model$lambda.min)
+# Mejor valor kappa encontrado
+paste("Mejor valor de kappa encontrado:", cv_model_lasso$lambda.min)
 ```
 
+Ahora ajustamos el modelo de regresión lasso nuevamente con el valor de kappa optimo .
+
 ```{r}
-# Mejor modelo kappa óptimo 
+#| eval: false
+#| include: false
+
+
+# Mejor modelo con el kappa óptimo 
 
 mejor_model_lasso <- glmnet(X, y, alpha = 1,lambda = cv_model$lambda.min)
+coef.glmnet(mejor_model_lasso)
 ```
 
-```{r}
-# Predicciones modelo de regresion ridge
+| Variable    | Coeficientes |
+|-------------|--------------|
+| (Intercept) | 29.47864426  |
+| CRIM        | -0.02935753  |
+| NOX         | -10.47212401 |
+| RM          | .            |
+| AGE         | .            |
+| PTRATIO     | .            |
+| LSTAT       | -0.36882565  |
 
-predicciones_lasso <- predict(mejor_model_lasso, newx = X)
+: Coeficientes regresión lasso con el mejor kappa {#tbl-coef_lasso}
+
+```{r}
+#| echo: false
+
+# Predicciones mejor modelo de regresion lasso
+predicciones_lasso <- predict(model_lasso, 
+                              s =cv_model_lasso$lambda.min,
+                              newx = X)
 ```
 
 ```{r}
 #| echo: false
 
-# MSE modelo de regresion ridge
+# MSE modelo de regresion lasso
 
 mse_lasso <- mean((predicciones_lasso - y)^2)
-paste("Error (mse) modelo lasso:", mse_lasso)
+paste("Error (mse) mejor modelo lasso:", mse_lasso)
 ```
+
+De la @tbl-coef_rr y @tbl-coef_lasso que representa los coeficientes de los modelos con el mejor valor optimo de kappa podemos notar que:
+
+-   Ridge mantiene todas las variables en el modelo, pero penaliza sus coeficientes, reduciendo su magnitud.
+
+-   Lasso seleccionó solo tres variables (CRIM, NOX, LSTAT) como las más relevantes, eliminando las demás.
+
+\newpage
+
+Después de ajustar los modelos de Ridge y LASSO utilizando los valores óptimos de Kappa y realizar predicciones, calculamos los errores medios cuadrados (MSE) para cada modelo.
+
+| Modelo | MSE (Error Medio Cuadrático) |
+|--------|:----------------------------:|
+| Ridge  |           11.4030            |
+| LASSO  |           11.3078            |
+
+
+
+: MSE mejores modelos Ridge y Lasso {#tbl-mse}
+
+
+De la @tbl-mse podemos decir que ambos modelos tienen errores similares, el modelo LASSO es ligeramente superior en términos de precisión predictiva debido a su menor MSE, la diferencia en el MSE entre ambos métodos es pequeña (~0.1), lo que sugiere que ambos modelos son adecuados para el problema (predicción).
+
+
+
+
 
 # Punto 4
 
 Realice el ajuste PCR y comente.
 
-```{r}
-# División de los datos en train y test
 
-entrenamiento <- datos4[401:480, ]
-prueba <- datos4[481:500, ]
+Primera mente aplicamos analisis de componetes principales a las variables predictoras.
+
+```{r}
+#| echo: false
+pca <- prcomp(datos4[,-7], scale. = TRUE)
+pca %>% summary()
 ```
+
+De acuedo a la salidad anterior basado en la proporción acumulada de varianza, 3 componentes principales son suficientes para capturar la mayor parte de la información relevante (77.2%).
+
+
+
+Ahora ajustemos sel modelo PCR realizando validación cruzada para elegir el número óptimo de componentes principales.
+
+
+```{r}
+set.seed(6475)
+pcr_model <- pcr(MEDV ~ ., data = datos4, scale = TRUE, validation = "CV")
+summary(pcr_model)
+```
+
+De la salida anterior podemos concluir que:
+
+- El error predicho disminuye significativamente hasta los 3 componentes principales y luego se estabiliza.
+
+- 3 componentes principales parece ser el número óptimo, ya que tiene el menor RMSEP ajustado (adjCV) de 3.632.
+
+- Los 3 primeros componentes principales explican el 77.22% de la varianza en las variables predictoras $X$ y el 57.04% de la varianza en MEDV.
+
+- Agregar más componentes (4, 5, o 6) no mejora significativamente la varianza explicada en MEDV.
+
+
+
+Después de seleccionar el número óptimo de componentes, realizaremos predicciones y calcularemos el error medio cuadrático (MSE).
+
+
+```{r}
+# Predicciones utilizando los componentes seleccionados
+predicciones <- predict(pcr_model, ncomp = 3, newdata = datos4)
+
+# Calcular el MSE
+mse_pcr <- mean((predicciones - datos4$MEDV)^2)
+print(paste("MSE del modelo PCR:", mse_pcr))
+```
+
+El MSE de PCR (12.03) es ligeramente mayor que el de Ridge (11.403) y LASSO (11.308).
+Esto indica que Ridge y LASSO son marginalmente más precisos en este caso específico
+
