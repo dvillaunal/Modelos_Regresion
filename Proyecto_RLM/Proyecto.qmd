@@ -834,3 +834,42 @@ qqline(residuales_est1, col = "red")
 ```
 
 De la @fig-QQ2 vemos que todavia hay algunos puntos que se alejan signifcativamente de la línea recta (en particular en los extremos), lo cual podemos decir de que no hay mejoria en la normalidad, por lo tanto se podria optar por elimninar esas obervaciones.
+
+
+
+
+
+<!-- Entrega 3 -->
+
+
+# Tercera Entrega
+
+
+
+## Punto 1
+
+## Matriz de correlaci´on de las variables predictoras
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
