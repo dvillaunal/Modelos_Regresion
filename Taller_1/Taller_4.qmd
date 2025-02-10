@@ -25,7 +25,10 @@ library(tidyverse)
 ```
 
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 \begin{titlepage}
 	\begin{center}
 		{\LARGE \textbf{Universidad Nacional De Colombia}} \\
@@ -70,9 +73,16 @@ library(tidyverse)
 
 
 
+<<<<<<< Updated upstream
+=======
+
+
+
+
+>>>>>>> Stashed changes
 ## Punto 1
 
-Realice una descripción de la base de datos. Contextualice el problema y explique cada una de las variables involucradas en el modelo. <https://www.codersarts.com/post/predict-boston-house-prices-using-python-linear-regression
+Realice una descripci´on de la base de datos. Contextualice el problema y explique cada una de las variables involucradas en el modelo. <https://www.codersarts.com/post/predict-boston-house-prices-using-python-linearregression>.
 
 ## Descripción de la base de datos
 
@@ -185,6 +195,8 @@ Los precios tienden a disminuir a medida que aumenta la variable `LSTAT`. aunque
 Ajuste un modelo de regresión lineal múltiple, muestre la tabla de parámetros ajustados y escriba la ecuación ajustada. Calcule la Anova del modelo ¿Es significativo el modelo? ¿Qué proporción de la variabilidad total de la respuesta es explicada por el modelo? Opine sobre esto último.
 
 ```{r}
+#| echo: false
+
 # Modelo de regresión lineal múltiple con todas las variables 
 modelo <- lm(MEDV~.,datos4)
 ```
@@ -320,12 +332,12 @@ $$
 
 
 
-## Punto 5
+# Punto 5
 
 Teniendo en cuenta los resultados anteriores, realice una prueba con sumas de cuadrados extras utilizando el test lineal general; especifique claramente el modelo reducido y el modelo completo, el estadístico de la prueba, su distribución, el cálculo del valor P, la decisión y la conclusión a la luz de los datos. Justifique la hipótesis que desea probar en este numeral.
 
 
-Del resultado anterior de la @tbl-resumen se considera considere el test parcial de la significancia de coeficientes asociados a las variables`RM`,`AGE` y` PTRATIO`.
+Del resultado anterior de la @tbl-resumen se considera considere el test parcial de la significancia de coeficientes asociados a las variables `RM`,`AGE` y `PTRATIO`.
 
 
 $$
@@ -488,9 +500,9 @@ Las variables CRIM, NOX y LSTAT son las variables con mayor impacto en la variab
 
 
 
+\newpage
 
-
-## Punto 7
+# Punto 7
 
 Construya y analice gráficos de los residuales estudentizados vs. Valores ajustados y contra las variables de regresión utilizadas. ¿Qué información proporcionan estas gráficas?
 
@@ -523,8 +535,13 @@ La @fig-resi nos dice que:
 - Aunque la mayoría de los puntos están cerca de la línea cero, hay algunos puntos que se encuentran bastante alejados (outliers), especialmente en la parte superior del gráfico.
 
 
+<<<<<<< Updated upstream
 \newpage
 
+=======
+
+\newpage
+>>>>>>> Stashed changes
 
 ```{r}
 #| echo: false
@@ -568,13 +585,17 @@ De la @fig-resi2 podemos decir que:
 - El gráfico de variable `RM` con respectoa los residuales tiene un rango más estrecho, pero igualmente los residuales parecen distribuidos aleatoriamente.
 
 
-## Punto 8
+# Punto 8
 
 Construya una gráfica de probabilidad normal para los residuales estudentizados. ¿Existen razones para dudar de la hipótesis de normalidad sobre los errores en este modelo?
 
+<<<<<<< Updated upstream
 
 \newpage
 
+=======
+\newpage
+>>>>>>> Stashed changes
 
 ```{r}
 #| echo: false
@@ -654,6 +675,10 @@ influenciales
 Estas observaciones tienen un impacto considerable en el modelo. Se debe investigar para decidir si se deben eliminar, ajustar, o conservar, dependiendo de si representan errores o datos extremos válidos. Si representan errores o casos extremos no representativos de la población general, podrían excluirse para mejorar la precisión del modelo. Sin embargo, si son casos válidos, es importante reconocer su impacto y considerar métodos robustos que puedan reducir su influencia sin eliminarlas.
 
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 # Punto 10 
 
 Suponga que se establece que hay un error de digitación en un máximo de 10 observaciones. Ajuste el modelo sin esas observaciones y presente solo la tabla de parámetros ajustados resultante. ¿Cambian notablemente las estimaciones de los parámetros, sus errores estándar y/o la significancia? ¿Qué concluye al respecto? Evalúe el gráfico de normalidad para los residuales studentizados de este ajuste. ¿Mejoró la normalidad? Concluya sobre los efectos de estas observaciones.
