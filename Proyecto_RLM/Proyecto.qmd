@@ -31,6 +31,9 @@ library(kableExtra)
 library(knitr)
 library(corrplot)
 library(pander)
+library(psych)
+library(olsrr)
+library(forcats)
 
 source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/FuncionesdeUsuarioRLM.R")
 ```
@@ -504,11 +507,40 @@ datos %>%
 
 De la @fig-bar3 podemos deducir que los carros con sistema de combustible a gas son los más preferidos, ademas se obeerva que el precio medio de los carros a gasolina es inferior al de los carros a diésel. Por lo tanto, podemos inferir que los clientes tienden a preferir carros que consumen menos combustible.
 
+```{r}
+#| layout-ncol: 2
+#| echo: false
+#| label: fig-bar3
+#| fig-cap: "Gráfico de barras"
+#| fig-subcap: 
+#|   - "cylindernumber"
+#|   - "average price vs cylindernumber"
+
+
+datos %>% ggplot(aes(x = factor(cylindernumber))) +
+    geom_bar(fill = "steelblue") +
+    theme_minimal()+
+  labs(x = "Número de cilindros del carro",
+       y = "Frecuencia")
+
+  
+
+datos %>%
+    group_by(cylindernumber) %>%
+    summarise(avg_price = mean(price, na.rm = TRUE)) %>%
+    arrange(desc(avg_price)) %>% 
+    ggplot(aes(x = cylindernumber, y = avg_price)) +
+    geom_bar(stat = "identity", fill = "coral") +
+    theme_minimal() +
+    labs(x = "Número de cilindros del carro",
+       y = "Precio Promedio")
+```
+
 # Conclusión
 
 Después de realizar el análisis descriptivo, observamos que algunas variables parecen tener una mayor influencia en la explicación del precio de los automóviles, mientras que otras presentan una relación menos significativa. Además, identificamos que, en ciertas variables categóricas, algunas categorías tienen un número reducido de observaciones, lo que podría limitar su representatividad en los análisis posteriores. Por ello, será importante evaluar cómo estas características afectan la interpretación y robustez de los resultados.
 
-<!------------------------- Segunda entrega ----------------------------------->
+<!-- segunda entrega -->
 
 # Segunda Entrega
 
@@ -835,20 +867,140 @@ qqline(residuales_est1, col = "red")
 
 De la @fig-QQ2 vemos que todavia hay algunos puntos que se alejan signifcativamente de la línea recta (en particular en los extremos), lo cual podemos decir de que no hay mejoria en la normalidad, por lo tanto se podria optar por elimninar esas obervaciones.
 
-
-
-
-
 <!-- Entrega 3 -->
-
 
 # Tercera Entrega
 
+Realice las siguientes actividades con todas las covariables y sin las observaciones que excluyó en el último punto de la segunda entrega.
 
+Teniendo en cuenta el ultimo entrega las observaciones problemas son las observaciones 28, 29, 30, y 35.
+
+Dado que hay variables categoricas con muchos niveles, ademas hay niveles que tienen pocas observaciones, vamos hacer una reagrupacion conservando las dos mas comunes y el resto en otros.
 
 ## Punto 1
 
-## Matriz de correlaci´on de las variables predictoras
+Realice diagnósticos de multicolinealidad mediante.
+
+```{r}
+#| echo: false
+# datos sin las observaciones problemas
+datos_03 <- datos[-c(28,29,30,35), -c(1,3,27)]
+
+datos_03 <- datos_03 %>% mutate_if(is.character, as.factor)
+datos_03$symboling %<>% as.factor() 
+```
+
+```{r}
+
+
+datos_03 <- datos_03 %>%
+  mutate(symboling = fct_lump_n(symboling, n = 2,
+                                     other_level = "otros"))
+
+table(datos_03$symboling)
+
+
+
+datos_03 <- datos_03 %>%
+  mutate(carbody = fct_lump_n(carbody, n = 2,
+                                     other_level = "otros"))
+
+table(datos_03$carbody)
+
+
+
+datos_03 <- datos_03 %>%
+  mutate(enginetype = fct_lump_n(enginetype, n = 2, 
+                                   other_level = "otros"))
+
+table(datos_03$enginetype)
+
+
+datos_03 <- datos_03 %>%
+  mutate(cylindernumber = fct_lump_n(cylindernumber, n = 2, 
+                                     other_level = "otros"))
+
+table(datos_03$cylindernumber)
+
+
+datos_03 <- datos_03 %>%
+  mutate(fuelsystem = fct_lump_n(fuelsystem, n = 2, 
+                                     other_level = "otros"))
+table(datos_03$fuelsystem)
+```
+
+### Matriz de correlación de las variables predictoras
+
+```{r}
+#| echo: false
+#| label: fig-corplot
+#| fig-cap: "Gráfico de Correlaciones" 
+
+corr_03 <- cor(datos_03[,c(10,11,12,14,17,19,20,21,22,23)], 
+               method = "pearson")
+
+corrplot(corr_03,
+         method = "number",            
+         type = "upper",
+         tl.cex = 0.8,
+         tl.col = "black",             
+         tl.srt = 45,                  
+         number.cex = 0.8,             
+         addCoef.col = "black",        
+         col = colorRampPalette(c("red", "white", "blue"))(200),
+         diag = FALSE)
+```
+
+```{r}
+# corPlot(corr_03)
+```
+
+De acuerdo a la @fig-corplot podemos concluir que:
+
+-   Hay pares de variables con correlaciones superiores a 0.8, lo que sugiere una fuerte relación lineal entre ellas.
+
+### VIF's
+
+```{r}
+# Ajuste del modelo de regresion con todas las variables
+modelo <- lm(price ~., data = datos_03)
+summary(modelo)
+
+X <- model.matrix(modelo)
+```
+
+```{r}
+vif(modelo)
+```
+
+| Variable         |    GVIF    | Df  | GVIF\^(1/(2\*Df)) |
+|------------------|:----------:|:---:|:-----------------:|
+| symboling        |  2.720621  |  2  |     1.284302      |
+| fueltype         | 102.826432 |  1  |     10.140337     |
+| aspiration       |  3.852278  |  1  |     1.962722      |
+| doornumber       |  2.785507  |  1  |     1.668984      |
+| carbody          |  3.431746  |  2  |     1.361065      |
+| drivewheel       |  7.872751  |  2  |     1.675065      |
+| enginelocation   |  2.348363  |  1  |     1.532437      |
+| wheelbase        | 10.179560  |  1  |     3.190542      |
+| carlength        | 12.979273  |  1  |     3.602676      |
+| carwidth         |  8.707703  |  1  |     2.950882      |
+| carheight        |  3.143094  |  1  |     1.772877      |
+| curbweight       | 27.914321  |  1  |     5.283400      |
+| enginetype       |  7.904407  |  2  |     1.676746      |
+| cylindernumber   |  5.826236  |  2  |     1.553628      |
+| enginesize       | 13.303805  |  1  |     3.647438      |
+| fuelsystem       |  7.947848  |  2  |     1.679045      |
+| boreratio        |  5.135105  |  1  |     2.266077      |
+| stroke           |  2.550635  |  1  |     1.597071      |
+| compressionratio | 88.188827  |  1  |     9.390891      |
+| horsepower       | 14.994613  |  1  |     3.872288      |
+| peakrpm          |  3.025330  |  1  |     1.739348      |
+| citympg          | 34.425066  |  1  |     5.867288      |
+| highwaympg       | 33.353248  |  1  |     5.775227      |
+
+
+: Factores de Inflación de Varianza Generalizada (GVIF) {#tbl-gvif}
 
 
 
@@ -856,20 +1008,33 @@ De la @fig-QQ2 vemos que todavia hay algunos puntos que se alejan signifcativame
 
 
 
+## Punto 2
 
+Construya modelos de regresión utilizando los métodos de selección (muestre de cada método sólo la tabla de resumen de este y la tabla ANOVA y la de parámetros estimados del modelo finalmente resultante):
 
+### Selección según el $R^2_{adj}$
 
+```{r}
+# Generar todos los modelos posibles
+k <- ols_step_all_possible(modelo)
 
+# Mejor modelo segun R2 adj
+k$result %>% select(predictors, adjr) %>% arrange(-adjr) %>% head() %>% 
+  kable(digits = 3, align = c('lc'))
+```
 
+### Selección según el estadístico $C_p$
 
+### Stepwise
 
+```{r}
+ols_step_both_p(modelo, details = TRUE)
+```
 
+### Selección hacia adelante o forward
 
+```{r}
+ols_step_forward_p(modelo,p_val=0.05,details =TRUE)
+```
 
-
-
-
-
-
-
-
+### Selección hacia atrás o backward
