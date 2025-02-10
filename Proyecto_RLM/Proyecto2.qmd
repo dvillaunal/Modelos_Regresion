@@ -1,0 +1,53 @@
+---
+lang: es
+format: 
+  pdf:
+    include-in-header:
+      - file: preamble.tex
+highlight-style: tango
+
+editor: source
+
+execute:
+  cache: True
+  warning: False
+---
+
+
+```{r}
+#| message: false
+#| echo: false
+
+library(tidyverse)
+library(magrittr)
+library(janitor)
+library(skimr)
+library(DataExplorer)
+library(GGally)
+library(reticulate)
+library(stringr)
+library(gridExtra)
+library(xtable)
+library(kableExtra)
+library(knitr)
+library(corrplot)
+library(pander)
+
+source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/FuncionesdeUsuarioRLM.R")
+```
+
+\input{portada}
+
+# Contexto de datos 
+
+## Plantamiento del problema
+
+Una empresa automotriz china, Geely Auto, tiene la intención de ingresar al mercado de Estados Unidos estableciendo una planta de fabricación allí y produciendo vehículos localmente para competir con sus contrapartes estadounidenses y europeas.
+
+Para ello, han contratado una consultora automotriz para comprender los factores que influyen en la fijación de precios de los vehículos. Específicamente, desean entender los factores que afectan el precio de los autos en el mercado estadounidense, ya que estos pueden ser muy diferentes a los del mercado chino. La empresa desea conocer:
+
+-   Qué variables son significativas para predecir el precio de un automóvil.
+-   Qué tan bien estas variables describen el precio de un automóvil.
+
+A partir de diversas encuestas de mercado, la consultora ha recopilado un conjunto de datos <https://www.kaggle.com/datasets/hellbuoy/car-price-prediction/data> sobre diferentes tipos de vehículos en el mercado estadounidense.
+
