@@ -2,8 +2,7 @@
 lang: es
 format: 
   pdf:
-    include-in-header:
-      - file: preamble.tex
+    geometry: margin=1in
 highlight-style: tango
 
 editor: source
@@ -59,7 +58,7 @@ source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/Funci
     {\Large Departamento de Estadística}
     \vspace{1.4cm}
 
-    {\LARGE\textbf{Proyecto - 1 y 2 Entrega}}
+    {\LARGE\textbf{Proyecto - 3 Entrega}}
     \vspace{1.4cm}    
     
     {\Large \textbf{Daniel Felipe Villa Rengifo}}
@@ -74,7 +73,7 @@ source("https://raw.githubusercontent.com/NelfiGonzalez/Regresion-DOE/main/Funci
     {\Large Modelos de Regresión}
     \vspace{0.5cm}
     
-    {\Large\textbf{Enero, 2025}}
+    {\Large\textbf{Febrero, 2025}}
 
     \end{center}
 \end{titlepage}
@@ -182,7 +181,7 @@ Para el análisis exploratorio de datos, y dado el gran número de variables dis
 
 La variables categóricas como `carbody`, `drivewheel`, `fueltype`,`enginetype` y `company_name` suelen ser indicadores del tipo de vehículo y su mercado objetivo.
 
-\newpage
+
 
 ## Variable respuesta
 
@@ -268,6 +267,7 @@ De la @fig-corr se pueden extraer las siguientes conclusiones:
 
 -   Hay pares de variables que tienen correlacion alta como `Enginesize` y `horsepower`: 0.8098 ,`Wheelbase` y `carlength`: 0.8746 , `Carlength` y `curbweight`: 0.8777 por lo que posiblemente no sea útil introducir algunas pares de variables en el modelo para evitar multicolinealidad.
 
+
 \newpage
 
 ```{r}
@@ -292,7 +292,7 @@ datos %>% count(company_name) %>%
 
 De la @fig-empresa, observamos que la mayoria de los carros en este conjunto de datos está dominado por unas pocas marcas, especialmente Toyota, que supera ampliamente a las demás,por lo tanto, podemos decir que Toyota es la empresa preferida de los clientes.
 
-\newpage
+
 
 ```{r}
 #| layout-ncol: 2
@@ -334,6 +334,8 @@ datos %>% group_by(company_name) %>%
 
 A partir de la @fig-empresa2 , observamos una diferencia significativa en el precio de los carros según la empresa a la que pertenecen. **Jaguar** y **Buick** parecen ofrecer los carros con las gamas de precios más altas.
 
+\newpage
+
 ```{r}
 #| layout-ncol: 2
 #| echo: false
@@ -359,7 +361,7 @@ datos %>% ggplot(aes(x = carwidth, y = price)) +
 
 De la @fig-disp se observa claramente que la longitud y la anchura del carro están estrechamente relacionadas con su precio.A medida que aumentan la longitud y la anchura del carro, también tiende a aumentar su precio.Sin embargo, no es posible hacer inferencias claras basadas únicamente en la relación entre la longitud y el precio, debido a la alta dispersión de los datos.La altura del carro no parece tener un impacto significativo en el precio.
 
-\newpage
+
 
 ```{r}
 #| layout-ncol: 2
@@ -412,6 +414,8 @@ datos %>% ggplot(aes(x = curbweight, y = price)) +
 ```
 
 De la @fig-disp3 se observa claramente que el peso del carro en vacío tiene una alta correlación ($0.84$) con el precio del carro. A medida que aumenta el peso en vacío, el precio del carro también incrementa de manera significativa. Aunque la distancia entre ejes y el precio no presentan una correlación tan alta, todavía existe una relación positiva. Por lo tanto, un aumento en la distancia entre ejes también está asociado con un incremento en el precio del carro.
+
+\newpage
 
 ```{r}
 #| layout-ncol: 2
@@ -476,6 +480,8 @@ datos %>%
 
 De la @fig-bar2 observamos que la mayoría de los carros vendidos tienen motores de árbol de levas en cabeza (OHC).Solo se ha vendido un carro con motor DOHCV, y existen muy pocos datos disponibles para los motores DOHCV y de rotor. Los carros con motores DOHCV son, en su mayoría, más caros. Por otro lado, los carros con motores OHC son los menos costosos.
 
+\newpage
+
 ```{r}
 #| layout-ncol: 2
 #| echo: false
@@ -507,34 +513,6 @@ datos %>%
 
 De la @fig-bar3 podemos deducir que los carros con sistema de combustible a gas son los más preferidos, ademas se obeerva que el precio medio de los carros a gasolina es inferior al de los carros a diésel. Por lo tanto, podemos inferir que los clientes tienden a preferir carros que consumen menos combustible.
 
-```{r}
-#| layout-ncol: 2
-#| echo: false
-#| label: fig-bar3
-#| fig-cap: "Gráfico de barras"
-#| fig-subcap: 
-#|   - "cylindernumber"
-#|   - "average price vs cylindernumber"
-
-
-datos %>% ggplot(aes(x = factor(cylindernumber))) +
-    geom_bar(fill = "steelblue") +
-    theme_minimal()+
-  labs(x = "Número de cilindros del carro",
-       y = "Frecuencia")
-
-  
-
-datos %>%
-    group_by(cylindernumber) %>%
-    summarise(avg_price = mean(price, na.rm = TRUE)) %>%
-    arrange(desc(avg_price)) %>% 
-    ggplot(aes(x = cylindernumber, y = avg_price)) +
-    geom_bar(stat = "identity", fill = "coral") +
-    theme_minimal() +
-    labs(x = "Número de cilindros del carro",
-       y = "Precio Promedio")
-```
 
 # Conclusión
 
@@ -689,6 +667,8 @@ Las variables \texttt{carlength}, \texttt{carwidth}, \texttt{carheight} y \textt
 
 Construya y analice gráficos de los residuales estudentizados vs. Valores ajustados y contra las variables de regresión utilizadas. ¿Que información proporcionan estas gráficas?
 
+\newpage
+
 ```{r}
 #| echo: false
 #| layout-ncol: 3
@@ -733,6 +713,8 @@ Del gráfico anterior podemos decir que
 
 Construya una gráfica de probabilidad normal para los residuales estudentizados. ¿Existen razones para dudar de la hipótesis de normalidad sobre los errores en este modelo?
 
+\newpage
+
 ```{r}
 #| echo: false
 #| label: fig-QQ
@@ -763,7 +745,7 @@ Para esto utilizaremos la función `influencePlot()`.
 influencePlot(mod_cont)
 ```
 
-\newpage
+
 
 ```{r}
 #| echo: false
@@ -823,7 +805,7 @@ data_clean <- var_continuas[-c(28, 29, 30, 35), ]
 mod_cont1 <- lm(price ~., data = data_clean)
 ```
 
-\newpage
+
 
 ```{r}
 #| echo: false
@@ -849,7 +831,8 @@ En general, no hubo cambios drásticos en los parámetros, lo que indica que el 
 
 -   Las observaciones eliminadas tenían un impacto limitado en el modelo general, aunque influían ligeramente en la significancia y magnitud de algunas variables clave, como `carlength` y `boreratio`.
 
-\newpage
+
+
 
 ```{r}
 #| echo: false
@@ -875,7 +858,9 @@ Realice las siguientes actividades con todas las covariables y sin las observaci
 
 Teniendo en cuenta el ultimo entrega las observaciones problemas son las observaciones 28, 29, 30, y 35.
 
-Dado que hay variables categoricas con muchos niveles, ademas hay niveles que tienen pocas observaciones, vamos hacer una reagrupacion conservando las dos mas comunes y el resto en otros.
+Dado que tenemos un gran numero de variables tanto numericas como categoricas, algunas con muchos niveles y algunos de esos niveles con pocas observaciones, basandonos en investigaciones previas consideraremos a ajustar el modelo considerando todas las variables numericas ya que pueden ser de relevancia en el precio de los carros.
+
+\newpage
 
 ## Punto 1
 
@@ -884,137 +869,147 @@ Realice diagnósticos de multicolinealidad mediante.
 ```{r}
 #| echo: false
 # datos sin las observaciones problemas
-datos_03 <- datos[-c(28,29,30,35), -c(1,3,27)]
+datos_03 <- datos[-c(28,29,30,35),-c(1,2)]
 
-datos_03 <- datos_03 %>% mutate_if(is.character, as.factor)
-datos_03$symboling %<>% as.factor() 
+
+datos_03 <- datos_03 %>%  select_if(is.numeric)
+
+# datos_03<- datos_03 %>% select_if(function(x) is.numeric(x) & !is.integer(x))
+
+# datos_03 <- datos_03 %>% mutate_if(is.character, as.factor)
+# datos_03$symboling %<>% as.factor() 
 ```
 
 ```{r}
+#| echo: false
 
 
-datos_03 <- datos_03 %>%
-  mutate(symboling = fct_lump_n(symboling, n = 2,
-                                     other_level = "otros"))
-
-table(datos_03$symboling)
-
-
-
-datos_03 <- datos_03 %>%
-  mutate(carbody = fct_lump_n(carbody, n = 2,
-                                     other_level = "otros"))
-
-table(datos_03$carbody)
-
-
-
-datos_03 <- datos_03 %>%
-  mutate(enginetype = fct_lump_n(enginetype, n = 2, 
-                                   other_level = "otros"))
-
-table(datos_03$enginetype)
-
-
-datos_03 <- datos_03 %>%
-  mutate(cylindernumber = fct_lump_n(cylindernumber, n = 2, 
-                                     other_level = "otros"))
-
-table(datos_03$cylindernumber)
-
-
-datos_03 <- datos_03 %>%
-  mutate(fuelsystem = fct_lump_n(fuelsystem, n = 2, 
-                                     other_level = "otros"))
-table(datos_03$fuelsystem)
+# datos_03 <- datos_03 %>%
+#   mutate(symboling = fct_lump_n(symboling, n = 2,
+#                                      other_level = "otros"))
+# 
+# table(datos_03$symboling)
+# 
+# 
+# 
+# datos_03 <- datos_03 %>%
+#   mutate(carbody = fct_lump_n(carbody, n = 2,
+#                                      other_level = "otros"))
+# 
+# table(datos_03$carbody)
+# 
+# 
+# 
+# datos_03 <- datos_03 %>%
+#   mutate(enginetype = fct_lump_n(enginetype, n = 2, 
+#                                    other_level = "otros"))
+# 
+# table(datos_03$enginetype)
+# 
+# 
+# datos_03 <- datos_03 %>%
+#   mutate(cylindernumber = fct_lump_n(cylindernumber, n = 2, 
+#                                      other_level = "otros"))
+# 
+# table(datos_03$cylindernumber)
+# 
+# 
+# datos_03 <- datos_03 %>%
+#   mutate(fuelsystem = fct_lump_n(fuelsystem, n = 2, 
+#                                      other_level = "otros"))
+# table(datos_03$fuelsystem)
 ```
 
 ### Matriz de correlación de las variables predictoras
 
 ```{r}
-#| echo: false
 #| label: fig-corplot
-#| fig-cap: "Gráfico de Correlaciones" 
+#| echo: false
+#| fig-cap: Gráfico de Correlaciones
 
-corr_03 <- cor(datos_03[,c(10,11,12,14,17,19,20,21,22,23)], 
-               method = "pearson")
+corr_03 <- cor(datos_03[,-14],method = "pearson")
 
 corrplot(corr_03,
          method = "number",            
          type = "upper",
-         tl.cex = 0.8,
-         tl.col = "black",             
-         tl.srt = 45,                  
-         number.cex = 0.8,             
+         tl.cex = 0.6,
+         tl.col = "black",                  
+         number.cex = 0.6,             
          addCoef.col = "black",        
          col = colorRampPalette(c("red", "white", "blue"))(200),
          diag = FALSE)
 ```
 
-```{r}
-# corPlot(corr_03)
-```
-
 De acuerdo a la @fig-corplot podemos concluir que:
 
--   Hay pares de variables con correlaciones superiores a 0.8, lo que sugiere una fuerte relación lineal entre ellas.
+-   Se observan correlaciones altas entre pares de variables:
+    -   carlength y wheelbase (0.88).
+    -   carwidth y curbweight (0.85).
+    -   enginesize y horsepower (0.81).
+-   Estas correlaciones nos sugieren que podría haber multicolinealidad en el modelo de regresión si se incluyen estas variables juntas.
+
+\newpage
 
 ### VIF's
 
 ```{r}
-# Ajuste del modelo de regresion con todas las variables
-modelo <- lm(price ~., data = datos_03)
+#| include: false
+# Ajuste del modelo co las variables numericas
+modelo <- lm(price ~.,data = datos_03)
 summary(modelo)
-
-X <- model.matrix(modelo)
 ```
 
 ```{r}
-vif(modelo)
+#| echo: false
+#| label: tbl-vifs
+#| tbl-cap: "Factores de inflación de varianza (VIF) para las variables predictoras del modelo"
+
+
+vif(modelo) %>% kable(col.names = c("Predictores","VIF"),align = c('c'))
 ```
 
-| Variable         |    GVIF    | Df  | GVIF\^(1/(2\*Df)) |
-|------------------|:----------:|:---:|:-----------------:|
-| symboling        |  2.720621  |  2  |     1.284302      |
-| fueltype         | 102.826432 |  1  |     10.140337     |
-| aspiration       |  3.852278  |  1  |     1.962722      |
-| doornumber       |  2.785507  |  1  |     1.668984      |
-| carbody          |  3.431746  |  2  |     1.361065      |
-| drivewheel       |  7.872751  |  2  |     1.675065      |
-| enginelocation   |  2.348363  |  1  |     1.532437      |
-| wheelbase        | 10.179560  |  1  |     3.190542      |
-| carlength        | 12.979273  |  1  |     3.602676      |
-| carwidth         |  8.707703  |  1  |     2.950882      |
-| carheight        |  3.143094  |  1  |     1.772877      |
-| curbweight       | 27.914321  |  1  |     5.283400      |
-| enginetype       |  7.904407  |  2  |     1.676746      |
-| cylindernumber   |  5.826236  |  2  |     1.553628      |
-| enginesize       | 13.303805  |  1  |     3.647438      |
-| fuelsystem       |  7.947848  |  2  |     1.679045      |
-| boreratio        |  5.135105  |  1  |     2.266077      |
-| stroke           |  2.550635  |  1  |     1.597071      |
-| compressionratio | 88.188827  |  1  |     9.390891      |
-| horsepower       | 14.994613  |  1  |     3.872288      |
-| peakrpm          |  3.025330  |  1  |     1.739348      |
-| citympg          | 34.425066  |  1  |     5.867288      |
-| highwaympg       | 33.353248  |  1  |     5.775227      |
+De acuerdo a la @tbl-vifs hay probema de multicolinealidad severa en algunas variables.
+
+### Indice de condición
+
+```{r}
+#| echo: false
+#| label: tbl-ic
+#| tbl-cap: "Índice de condición para las variables predictoras del modelo"
+
+multicolin(modelo, center = TRUE)[4] %>% kable(align = c('c'))
+```
+
+Según la @tbl-ic hay valores del índice de condición mayores a 10, y menores a 30 lo que indica que hay problemas de multicolinealidad moderada entre las variables predictoras.
+
+\newpage
+
+### Proporciones de varianza.
+
+```{r}
+#| echo: false
+#| label: tbl-pv
+#| tbl-cap: "Proporciones de varianza para las variables predictoras del modelo"
 
 
-: Factores de Inflación de Varianza Generalizada (GVIF) {#tbl-gvif}
+multicolin(modelo, center = TRUE)[,c(3,5,6,7,8,9,10)] %>% 
+  kable(align = c('ccccccc'), digits = 4)
+```
 
-
-
-
-
-
+Según la @tbl-pv hay proporciones $\pi_{ij}$ altas $(> 0.5)$ para dos o más coeficientes de regresión asociados con un mismo valor propio pequeño, por tanto hay evidencia de multicolinealidad entre las variables correspondientes a tales coeficientes.
 
 ## Punto 2
 
 Construya modelos de regresión utilizando los métodos de selección (muestre de cada método sólo la tabla de resumen de este y la tabla ANOVA y la de parámetros estimados del modelo finalmente resultante):
 
+\newpage
+
 ### Selección según el $R^2_{adj}$
 
 ```{r}
+#| echo: false
+#| label: tbl-Radj
+#| tbl-cap: "Selección de Modelos según el Estadístico $R^2_{adj}$"
 # Generar todos los modelos posibles
 k <- ols_step_all_possible(modelo)
 
@@ -1023,18 +1018,228 @@ k$result %>% select(predictors, adjr) %>% arrange(-adjr) %>% head() %>%
   kable(digits = 3, align = c('lc'))
 ```
 
+Según la @tbl-Radj podemos concluir que:
+
+Algunos modelos seleccionados explican el 84.1% de la variabilidad de la respuesta (( R\^2\_{adj} = 0.841 )), lo que indica que diferentes combinaciones de predictores tienen un rendimiento estadístico similar.
+
 ### Selección según el estadístico $C_p$
+
+```{r}
+#| echo: false
+#| label: tbl-cp
+#| tbl-cap: "Selección de Modelos según el Estadístico $C_p$"
+
+
+# Mejor modelo segun Cp
+
+k$result %>% select(predictors, cp) %>% arrange(cp) %>% head() %>% 
+  kable(digits = 3, align = c('lc'))
+```
+
+Según la @tbl-cp podemos concluir que:
+
+-   La selección de modelos utilizando el estadístico ( C_p ) proporciona resultados consistentes con los modelos más parsimoniosos. A continuación, se destacan los hallazgos:
+
+-   El modelo con el menor valor de ( C_p ) (9.516) incluye las siguientes variables: \texttt{carwidth}, \texttt{curbweight}, \texttt{enginesize}, \texttt{stroke}, \texttt{compressionratio}, \texttt{horsepower} y \texttt{peakrpm}. Esto indica que es el modelo más eficiente en términos de ajuste y complejidad.
 
 ### Stepwise
 
 ```{r}
-ols_step_both_p(modelo, details = TRUE)
+#| eval: false
+#| include: false
+ols_step_both_p(modelo,p_enter = 0.05,p_remove = 0.05, details = TRUE)
 ```
+
+### Stepwise Summary
+
+| Step | Variable             | AIC      | SBC      | SBIC     | R²      | Adj. R² |
+|------|----------------------|----------|----------|----------|---------|---------|
+| 0    | Base Model           | 4188.440 | 4195.046 | 3614.935 | 0.00000 | 0.00000 |
+| 1    | enginesize (+)       | 3898.712 | 3908.621 | 3326.831 | 0.76575 | 0.76458 |
+| 2    | curbweight (+)       | 3872.598 | 3885.811 | 3300.808 | 0.79633 | 0.79427 |
+| 3    | peakrpm (+)          | 3850.004 | 3866.520 | 3278.670 | 0.81979 | 0.81704 |
+| 4    | stroke (+)           | 3842.894 | 3862.714 | 3271.764 | 0.82777 | 0.82426 |
+| 5    | compressionratio (+) | 3834.705 | 3857.828 | 3264.022 | 0.83628 | 0.83209 |
+| 6    | horsepower (+)       | 3831.216 | 3857.643 | 3260.869 | 0.84069 | 0.83577 |
+| 7    | carwidth (+)         | 3827.563 | 3857.292 | 3257.681 | 0.84511 | 0.83950 |
+| 8    | curbweight (-)       | 3829.548 | 3855.974 | 3259.317 | 0.84201 | 0.83713 |
+
+: Resumen Stepwise {#tbl-stepwise}
+
+### ANOVA Table
+
+| Source     | Sum of Squares  | DF  | Mean Square    | F       | Sig.   |
+|------------|-----------------|-----|----------------|---------|--------|
+| Regression | 10895045813.356 | 6   | 1815840968.893 | 172.323 | 0.0000 |
+| Residual   | 2044262318.091  | 194 | 10537434.629   |         |        |
+| Total      | 12939308131.447 | 200 |                |         |        |
+
+: ANOVA Stepwise {#tbl-stepwise_anova}
+
+| Variable | Beta | Std. Error | Std. Beta | t | Sig. | Lower Bound | Upper Bound |
+|---------------|:-------:|:-------:|:------:|-------|:-----:|:--------|--------:|
+| (Intercept) | -61651.158 | 10967.630 |  | -5.621 | 0.000 | -83282.258 | -40020.058 |
+| enginesize | 118.085 | 12.651 | 0.615 | 9.334 | 0.000 | 93.135 | 143.035 |
+| peakrpm | 2.252 | 0.646 | 0.133 | 3.487 | 0.001 | 0.978 | 3.525 |
+| stroke | -2817.179 | 775.921 | -0.110 | -3.631 | 0.000 | -4347.502 | -1286.856 |
+| compressionratio | 262.483 | 68.598 | 0.130 | 3.826 | 0.000 | 127.189 | 397.777 |
+| horsepower | 39.662 | 12.800 | 0.196 | 3.098 | 0.002 | 14.416 | 64.907 |
+| carwidth | 770.751 | 166.440 | 0.206 | 4.631 | 0.000 | 442.488 | 1099.015 |
+
+: Parámetros estimados del modelo final Stepwise {#tbl-stepwise_parametros}
 
 ### Selección hacia adelante o forward
 
 ```{r}
+#| eval: false
+#| include: false
 ols_step_forward_p(modelo,p_val=0.05,details =TRUE)
 ```
 
+| Step | Variable         | AIC      | SBC      | SBIC     | R²      | Adj. R² |
+|------|------------------|----------|----------|----------|---------|---------|
+| 0    | Base Model       | 4188.440 | 4195.046 | 3614.935 | 0.00000 | 0.00000 |
+| 1    | enginesize       | 3898.712 | 3908.621 | 3326.831 | 0.76575 | 0.76458 |
+| 2    | curbweight       | 3872.598 | 3885.811 | 3300.808 | 0.79633 | 0.79427 |
+| 3    | peakrpm          | 3850.004 | 3866.520 | 3278.670 | 0.81979 | 0.81704 |
+| 4    | stroke           | 3842.894 | 3862.714 | 3271.764 | 0.82777 | 0.82426 |
+| 5    | compressionratio | 3834.705 | 3857.828 | 3264.022 | 0.83628 | 0.83209 |
+| 6    | horsepower       | 3831.216 | 3857.643 | 3260.869 | 0.84069 | 0.83577 |
+| 7    | carwidth         | 3827.563 | 3857.292 | 3257.681 | 0.84511 | 0.83950 |
+
+: Resumen Forward {#tbl-forward}
+
+| Source     | Sum of Squares  | DF  | Mean Square    | F       | Sig.   |
+|------------|-----------------|-----|----------------|---------|--------|
+| Regression | 10935177611.572 | 7   | 1562168230.225 | 150.439 | 0.0000 |
+| Residual   | 2004130519.875  | 193 | 10384095.958   |         |        |
+| Total      | 12939308131.447 | 200 |                |         |        |
+
+: ANOVA Forward {#tbl-forward_anova}
+
+| Variable | Coeficiente | Error Estándar | Beta Estandarizado | t | p -value | Intervalo de Confianza (95%) |
+|-----------------|:-------:|:-------:|:-------:|:-------:|:-----:|----------:|
+| (Intercepto) | -49384.392 | 12548.844 |  | -3.935 | 0.000 | \[-74134.874, -24633.909\] |
+| `enginesize` | 110.052 | 13.206 | 0.573 | 8.333 | 0.000 | \[84.006, 136.099\] |
+| `curbweight` | 2.347 | 1.194 | 0.153 | 1.966 | 0.051 | \[-0.008, 4.701\] |
+| `peakrpm` | 2.503 | 0.654 | 0.148 | 3.829 | 0.000 | \[1.214, 3.792\] |
+| `stroke` | -2758.629 | 770.830 | -0.107 | -3.579 | 0.000 | \[-4278.962, -1238.296\] |
+| `compressionratio` | 240.409 | 69.017 | 0.120 | 3.483 | 0.001 | \[104.285, 376.533\] |
+| `horsepower` | 31.735 | 13.331 | 0.157 | 2.381 | 0.018 | \[5.442, 58.029\] |
+| `carwidth` | 502.674 | 214.229 | 0.135 | 2.346 | 0.020 | \[80.143, 925.205\] |
+
+: Parámetros estimados del modelo final Forward {#tbl-forward_parametros}
+
 ### Selección hacia atrás o backward
+
+```{r}
+#| eval: false
+#| include: false
+ols_step_backward_p(modelo,p_val=0.05,details = TRUE)
+```
+
+| Step | Variable Removed | AIC      | SBC      | SBIC     | R²      | Adj. R² |
+|------|------------------|----------|----------|----------|---------|---------|
+| 0    | Full Model       | 3831.642 | 3881.192 | 3263.314 | 0.85110 | 0.84075 |
+| 1    | boreratio        | 3830.295 | 3876.542 | 3261.728 | 0.85061 | 0.84108 |
+| 2    | curbweight       | 3829.532 | 3872.475 | 3260.665 | 0.84969 | 0.84094 |
+| 3    | highwaympg       | 3828.548 | 3868.188 | 3259.435 | 0.84893 | 0.84098 |
+| 4    | wheelbase        | 3828.221 | 3864.557 | 3258.816 | 0.84767 | 0.84049 |
+| 5    | carlength        | 3827.575 | 3860.608 | 3257.943 | 0.84664 | 0.84025 |
+| 6    | citympg          | 3828.062 | 3857.792 | 3258.139 | 0.84473 | 0.83910 |
+| 7    | carheight        | 3829.548 | 3855.974 | 3259.317 | 0.84201 | 0.83713 |
+
+: Resumen Backward {#tbl-backward}
+
+| Source     | Sum of Squares  | DF  | Mean Square    | F       | Sig.   |
+|------------|-----------------|-----|----------------|---------|--------|
+| Regression | 10895045813.356 | 6   | 1815840968.893 | 172.323 | 0.0000 |
+| Residual   | 2044262318.091  | 194 | 10537434.629   |         |        |
+| Total      | 12939308131.447 | 200 |                |         |        |
+
+: ANOVA Backward {#tbl-backward_anova}
+
+| Variable | Coeficiente | Error Estándar | Beta Estandarizado | t | p-value | Intervalo de Confianza (95%) |
+|-----------------|:---------:|:---------:|:---------:|:-------:|:-----:|----------:|
+| (Intercepto) | -61651.158 | 10967.630 |  | -5.621 | 0.000 | \[-83282.258, -40020.058\] |
+| `carwidth` | 770.751 | 166.440 | 0.206 | 4.631 | 0.000 | \[442.488, 1099.015\] |
+| `enginesize` | 118.085 | 12.651 | 0.615 | 9.334 | 0.000 | \[93.135, 143.035\] |
+| `stroke` | -2817.179 | 775.921 | -0.110 | -3.631 | 0.000 | \[-4347.502, -1286.856\] |
+| `compressionratio` | 262.483 | 68.598 | 0.130 | 3.826 | 0.000 | \[127.189, 397.777\] |
+| `horsepower` | 39.662 | 12.800 | 0.196 | 3.098 | 0.002 | \[14.416, 64.907\] |
+| `peakrpm` | 2.252 | 0.646 | 0.133 | 3.487 | 0.001 | \[0.978, 3.525\] |
+
+: Parámetros estimados del modelo final Backward {#tbl-backward_parametros}
+
+
+## Punto 3
+
+Teniendo en cuenta los resultados del numeral anterior y los supuestos del modelo, ¿Cuál modelo sugiere para la variable respuesta? ¿por qué?
+
+El modelo más adecuado sería el **Backward**, ya que produce un modelo más parsimonioso (con menos variables). Además, ninguno de los tres modelos obtenidos mediante los métodos del numeral anterior cumple con los supuestos. Por lo tanto, las variables seleccionadas en el modelo **Backward** son: *carwidth, enginesize, stroke, compressionratio, horsepower* y *peakrpm*.
+
+
+
+```{r}
+mod_backward <- lm(price~carwidth+enginesize+stroke+compressionratio+
+                     horsepower+peakrpm, data = datos_03)
+```
+
+
+
+## Punto 4
+
+
+Con el modelo que seleccionó en el numeral anterior realice una intervalo de respuesta media y de predicción al 90% para la variable de respuesta. Justifique claramente la selección de los valores de las covariables. Realice las pruebas pertinentes para llevar a cabo este numeral.
+
+Escogeremos la media de cada variable debido a que representa un automóvil promedio dentro de la muestra de datos, ademas permite obtener una predicción que es representativa del conjunto de datos.
+
+
+
+```{r}
+#| include: false
+# Seleccionar valores representativos (media de cada variable)
+valores_covariables <- data.frame(
+  carwidth = mean(datos_03$carwidth),
+  enginesize = mean(datos_03$enginesize),
+  stroke = mean(datos_03$stroke),
+  compressionratio = mean(datos_03$compressionratio),
+  horsepower = mean(datos_03$horsepower),
+  peakrpm = mean(datos_03$peakrpm)
+)
+
+# Calcular intervalos de confianza y predicción al 90%
+pred_conf <- predict(mod_backward, newdata = valores_covariables, interval = "confidence", level = 0.90)
+pred_pred <- predict(mod_backward, newdata = valores_covariables, interval = "prediction", level = 0.90)
+
+
+
+# Mostrar resultados
+print("Intervalo de confianza al 90% (Media esperada)")
+print(pred_conf)
+
+print("Intervalo de predicción al 90% (Para una nueva observación)")
+print(pred_pred)
+```
+
+| Tipo de Intervalo             | Estimación (fit) | Límite Inferior (lwr) | Límite Superior (upr) |
+|-------------------------------|------------------|-----------------------|-----------------------|
+| **Intervalo de confianza 90%** | 13,354          | 12,975.58             | 13,732.42             |
+| **Intervalo de predicción 90%**| 13,354          | 7,975.62              | 18,732.37             |
+
+
+
+: Intervalos de confianza y predicción
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
