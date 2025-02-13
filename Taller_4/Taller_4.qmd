@@ -1,0 +1,204 @@
+---
+lang: es
+toc: true
+toc-title: Contenido
+format: pdf
+highlight-style: github
+editor: source
+
+execute: 
+  cache: true
+  warning: false
+---
+
+\begin{titlepage}
+    \begin{center}
+        {\LARGE \textbf{Universidad Nacional De Colombia}} \\
+        
+        \vspace{4mm}
+        
+        {\Large \textbf{Sede Medellín}}
+        \vspace{0.3cm}
+        \begin{figure}[h]
+            \centering
+        \includegraphics[height=5cm]{logo.jpg}
+        \end{figure}
+    
+    \vspace{1mm}
+    
+    {\LARGE \textbf{Facultad de Ciencias}}
+    \vspace{5mm}
+    
+    {\Large Departamento de Estadística}
+    \vspace{1.4cm}
+
+    {\LARGE\textbf{Taller 4}}
+    \vspace{1.4cm}    
+    
+    {\Large \textbf{Daniel Felipe Villa Rengifo}}
+    \vspace{4mm}
+    
+    {\Large \textbf{Luis David Hernández Pérez}}
+    \vspace{4mm}
+    
+    {\Large \textbf{Juan Gabriel Carvajal Negrete}}
+    \vspace{1.4cm}
+    
+    {\Large Modelos de Regresión}
+    \vspace{1cm}
+    
+    {\Large\textbf{Febrero, 2025}}
+
+    \end{center}
+\end{titlepage}
+
+<!-- ======================================================================== -->
+
+```{r}
+#| echo: false
+#| message: false
+
+
+library(ISLR)
+library(tidyverse)
+library(hrbrthemes)
+library(magrittr)
+library(kableExtra)
+```
+
+```{r}
+#| echo: false
+
+data("Credit")
+
+# datos asignados al grupo
+datos = Credit[30:95,c(4,10)]
+```
+
+Se hará el análisis de la base de datos \textbf{Credit} de la librería \textbf{ISLR} de R. Se tendrá como variable de respuesta \texttt{Married} y como variable explicativa \texttt{Rating}. Debe codificar las variables de respuesta con 1 para \texttt{Yes} y 0 para \texttt{No}. Las observaciones a ser incluidas para el análisis en cada grupo aparecen en la Tabla 1. Realice las siguientes actividades:
+
+# Punto 1
+
+Realice una descripción de la base de datos. Contextualice el problema y explique cada una de las variables involucradas en el modelo.
+
+## Solución Punto1
+
+**Descripción de los datos**: Es un conjunto de datos simulados que contiene información sobre diez mil clientes. El objetivo es predecir qué clientes dejarán de pagar su tarjeta de crédito.
+
+Descripción de las variables
+
+-   **Married**: Variable categórica que indica si la persona está casada (Yes/No).
+-   **Rating**: Variable numérica que representa el rating de crédito de la persona.
+
+# Punto 2
+
+Realice un análisis descriptivo de las variables que se van a tener en cuenta en el modelo. Concluya.
+
+## Solución Punto 2
+
+```{r}
+#| include: false
+
+datos$Rating %>% min()
+datos$Rating %>% mean()
+datos$Rating %>% var()
+datos$Rating %>% max()
+```
+
+```{r}
+#| label: fig-his
+#| echo: false
+#| fig-cap: Distribución del Rating
+datos %>%  ggplot(aes(x=Rating))+
+  geom_histogram(binwidth = 30, fill="#69b3a2", color="#e9ecef",alpha=0.9)+
+  theme_bw()
+```
+
+```{r}
+#| include: false
+datos$Married %>% table()
+```
+
+| Married | Frecuencia | Porcentaje |
+|---------|:----------:|:----------:|
+| Yes     |     42     |  63.63 %   |
+| No      |     24     |  36.36 %   |
+| Total   |     66     |    100     |
+
+
+: Distribución de la variable Married en la muestra analizada {#tbl-married}
+
+```{r}
+#| label: fig-box
+#| echo: false
+#| fig-cap: Boxplot Rating vs Married
+
+
+datos %>% ggplot(aes(x= Married, y=Rating, colour = Married))+
+  geom_boxplot()+
+  geom_jitter(width = 0.1)+
+  theme_bw()+
+  scale_color_brewer(palette = "Set2")+
+  theme(legend.position = "none")
+```
+
+# Punto 3
+
+Ajuste un modelo de regresión logística, muestre la tabla de parámetros ajustados y escriba la ecuación ajustada.
+
+```{r}
+#| echo: false
+datos$Married_cod <- ifelse(datos$Married=="Yes", 1, 0)
+```
+
+```{r}
+#| include: false
+modelo <- glm(Married_cod ~ Rating, data = datos, family = binomial)
+summary(modelo)
+```
+
+| Coeficiente  | Estimación | Error estándar | valor z | Pr($>|z|$) |
+|--------------|:----------:|:--------------:|:-------:|:----------:|
+| (Intercepto) | -1.208379  |    0.812019    | -1.488  |   0.1367   |
+| Rating       |  0.005268  |    0.002372    |  2.221  |   0.0264   |
+
+: Coeficientes ajustados {#tbl-coef}
+
+$$
+\hat{Y} = \frac{e^{-1.208379 + 0.005268 \cdot \text{Rating}}}{1 + e^{-1.208379 + 0.005268 \cdot \text{Rating}}}
+$$
+
+# Punto 4
+
+Pruebe la significancia individual del parámetro que acompaña a la variable explicativa e interprete el valor de la estimación. También interprete la razón de odds.
+
+Para la significancia de $\beta_1$ tenemos la siguiente hipotesis:
+
+$$
+H_0:\beta_1=0 \quad vs \quad H_1:\beta_1 \neq0
+$$
+
+donde le estadístico de prueba es
+
+$$
+Z_0=\frac{\hat{\beta}_1}{se(\hat{\beta}_1)}
+$$
+
+De la @tbl-coef tenemos que la variable `Rating`, $\beta_1 = 0.005268$ y
+
+\newpage
+
+# Punto 5
+
+Determine si el modelo ajustado es mejor que el modelo nulo.
+
+Para esta verificacion ultilizaremos la función `Anova()`
+
+```{r}
+#| echo: false
+#| label: tbl-anova
+#| tbl-cap: Anova del modelo
+anova(modelo,test = "Chisq") %>% kable(align = 'ccccc')
+```
+
+De la @tbl-anova podemos concluir que el modelo ajustado (modelo completo) es significativo, por tanto es mejor que el modelo nulo.
