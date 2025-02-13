@@ -527,7 +527,7 @@ Después de realizar el análisis descriptivo, observamos que algunas variables 
 Ajuste un modelo de regresión lineal múltiple únicamente con las covariables continuas, muestre la tabla de parámetros ajustados y escriba la ecuación ajustada. Calcule la Anova del modelo ¿Es significativo el modelo? ¿Que proporción de la variabilidad total de la respuesta es explicada por el modelo? Opine sobre esto ultimo.
 
 ```{r}
-# seleccion de variables continuas
+# selección de variables continuas
 var_continuas <- datos %>% 
   select(wheelbase, carlength, carwidth, carheight, boreratio, stroke,
          compressionratio, price)
@@ -620,7 +620,7 @@ Y_i = \beta_0 + \beta_1 \text{\texttt{wheelbase}} + \beta_2 \text{\texttt{carlen
 \text{\texttt{boreratio}} + \beta_6 \text{\texttt{stroke}} + \beta_7 \text{\texttt{compressionratio}} + \epsilon
 \end{align*}
 
-El modeloreducido(MR):
+El modelo reducido(MR):
 
 \begin{equation*}
 Y_i = \beta_0 + \beta_1 \text{\texttt{wheelbase}} + \beta_6 \text{\texttt{stroke}} + \beta_7 \text{\texttt{compressionratio}} + \epsilon
