@@ -1,6 +1,5 @@
 ---
 lang: es
-toc: true
 toc-title: Contenido
 format: pdf
 highlight-style: github
@@ -83,7 +82,7 @@ Realice una descripción de la base de datos. Contextualice el problema y expliq
 
 ## Solución Punto1
 
-**Descripción de los datos**: Es un conjunto de datos simulados que contiene información sobre diez mil clientes. El objetivo es predecir qué clientes dejarán de pagar su tarjeta de crédito.
+**Descripción de los datos**: Es un conjunto de datos simulados que contiene información sobre diez mil clientes. Considerando todas las variables el objetivo es predecir qué clientes dejarán de pagar su tarjeta de crédito, pero para este caso el objetivo es establecer un modelo que permita determinar como el rating de crédito de la persona influye en la probabilidad de que esa persona este casada o no.
 
 Descripción de las variables
 
@@ -105,14 +104,29 @@ datos$Rating %>% var()
 datos$Rating %>% max()
 ```
 
+| Min |  Mean  |   Var    | Max |
+|:---:|:------:|:--------:|:---:|
+| 122 | 349.21 | 18066.23 | 828 |
+
+: Resumen Numérico Variable Rating {#tbl-rating}
+
+La variable **Rating** presenta una media alrededor de 350 y valores extremos que podrían estar influyendo en la variabilidad observada.
+
+\newpage
+
 ```{r}
 #| label: fig-his
 #| echo: false
-#| fig-cap: Distribución del Rating
+#| fig-cap: Histograma del Rating
 datos %>%  ggplot(aes(x=Rating))+
-  geom_histogram(binwidth = 30, fill="#69b3a2", color="#e9ecef",alpha=0.9)+
+  geom_histogram(binwidth = 30, 
+                 fill="#69b3a2", 
+                 color="#e9ecef",
+                 alpha=0.9)+
   theme_bw()
 ```
+
+De la @fig-his podemos decir que a distribución parece ser asimétrica hacia la derecha , ya que hay algunas personas con valores de rating altos, la mayoría de personas se concentran en valores de rating entre 150 y 450.
 
 ```{r}
 #| include: false
@@ -121,12 +135,15 @@ datos$Married %>% table()
 
 | Married | Frecuencia | Porcentaje |
 |---------|:----------:|:----------:|
-| Yes     |     42     |  63.63 %   |
+| Yes     |     42     |  63.64 %   |
 | No      |     24     |  36.36 %   |
 | Total   |     66     |    100     |
 
-
 : Distribución de la variable Married en la muestra analizada {#tbl-married}
+
+Al analizar la tabla @tbl-married, se observa que la mayoría de las personas en el conjunto de datos están casadas. En concreto, hay **42 personas casadas**, lo que contrasta con las **24 personas que no lo están**. Esto indica que, en la muestra analizada, el estado civil predominante es el de casado.
+
+\newpage
 
 ```{r}
 #| label: fig-box
@@ -142,9 +159,13 @@ datos %>% ggplot(aes(x= Married, y=Rating, colour = Married))+
   theme(legend.position = "none")
 ```
 
+Del @fig-box observamos que las personas que estan casadas tienen mayor variabilidad con respecto al Rating, parece que no existe diferencia en el rating entre las personas que estan casadas o no.
+
 # Punto 3
 
 Ajuste un modelo de regresión logística, muestre la tabla de parámetros ajustados y escriba la ecuación ajustada.
+
+## Solución Punto 3
 
 ```{r}
 #| echo: false
@@ -164,6 +185,18 @@ summary(modelo)
 
 : Coeficientes ajustados {#tbl-coef}
 
+El modelo ajustado es
+
+$$
+\text{logit}(\text{married})= -1.208379 + 0.005268*\text{rating}
+$$
+$$
+\text{p}(\text{married}) = \frac{\text{exp}(-1.208379 + 0.005268*\text{rating})}{1+\text{exp}(-1.208379 + 0.005268*\text{rating})}
+$$
+
+
+
+
 $$
 \hat{Y} = \frac{e^{-1.208379 + 0.005268 \cdot \text{Rating}}}{1 + e^{-1.208379 + 0.005268 \cdot \text{Rating}}}
 $$
@@ -172,19 +205,25 @@ $$
 
 Pruebe la significancia individual del parámetro que acompaña a la variable explicativa e interprete el valor de la estimación. También interprete la razón de odds.
 
-Para la significancia de $\beta_1$ tenemos la siguiente hipotesis:
+
+## Solución Punto 4
+
+Para la significancia de $\beta_1$ tenemos la siguiente hipótesis:
 
 $$
 H_0:\beta_1=0 \quad vs \quad H_1:\beta_1 \neq0
 $$
 
-donde le estadístico de prueba es
+donde le estadístico de prueba es:
 
 $$
 Z_0=\frac{\hat{\beta}_1}{se(\hat{\beta}_1)}
 $$
 
-De la @tbl-coef tenemos que la variable `Rating`, $\beta_1 = 0.005268$ y
+Observando la @tbl-coef vemos que el parámetro que acompaña a la variable rating es significativo con un p-valor= $0.026 < \alpha=0.05$
+
+De acuerdo a los resultados de la @tbl-coef, el logaritmo de los odds de que una persona este casado está positivamente relacionado con la puntuación del Rating $\hat{\beta}_1 = 0.005268$.Esto significa que, por cada unidad que se incrementa la variable rating, se espera que el logaritmo de odds de la variable married se incremente en promedio 0.005268 unidades. Aplicando la inversa del logaritmo natural (exp(0.005268)= 1.005282) se obtiene que, por cada unidad que se incrementa la variable rating, los odds de estar casado se incremente en promedio 1.005282 unidades.
+
 
 \newpage
 
@@ -192,7 +231,9 @@ De la @tbl-coef tenemos que la variable `Rating`, $\beta_1 = 0.005268$ y
 
 Determine si el modelo ajustado es mejor que el modelo nulo.
 
-Para esta verificacion ultilizaremos la función `Anova()`
+## Solución Punto 5
+
+Para esta verificación utilizaremos la función `Anova()`
 
 ```{r}
 #| echo: false
