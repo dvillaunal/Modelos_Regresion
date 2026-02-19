@@ -185,6 +185,8 @@ summary(modelo)
 
 : Coeficientes ajustados {#tbl-coef}
 
+\newpage
+
 El modelo ajustado es
 
 $$
@@ -243,3 +245,114 @@ anova(modelo,test = "Chisq") %>% kable(align = 'ccccc')
 ```
 
 De la @tbl-anova podemos concluir que el modelo ajustado (modelo completo) es significativo, por tanto es mejor que el modelo nulo.
+
+
+# Punto 6
+
+Realice un gráfico con los valores ajustados de la probabilidad de éxito, incluya el intervalo de confianza al 95%. Concluya.
+
+
+\newpage
+
+```{r}
+#| include: false
+#Intervalos para el predictor lineal 
+# Se crea un vector con nuevos valores interpolados en el rango de observaciones.
+
+nuevos_puntos <- seq(from = min(datos$Rating), 
+                     to = max(datos$Rating), 
+                     by = 1)
+
+
+# Predicciones de los nuevos puntos según el modelo. 
+# Se indica se.fit = TRUE se devuelve el error estándar de cada predicción. 
+# Se indica type = "response" para que las predicciones 
+# sean las probabilidades de éxito 
+pi_ajustado <- predict(modelo, data.frame(Rating = nuevos_puntos), 
+                       se.fit = TRUE, 
+                       type = "response")
+
+
+names(pi_ajustado) 
+
+# Se calcula el límite inferior y superior del IC del 95% para las probabilidades
+
+limite_inferior <- pi_ajustado$fit- 1.96 * pi_ajustado$se.fit 
+limite_superior <- pi_ajustado$fit + 1.96 * pi_ajustado$se.fit
+```
+
+
+
+```{r}
+#| echo: false
+# Se crea un dataframe con los nuevos puntos y sus predicciones 
+datos_curva <- data.frame(Rating =nuevos_puntos, 
+                          probabilidad_married = pi_ajustado$fit, 
+                          limite_inferior, limite_superior)
+```
+
+
+
+
+
+```{r}
+#| echo: false
+#| label: fig-log
+#| fig-cap: "Modelo regresión logística Married ~ Rating"
+
+
+ggplot(datos, aes(x = Rating, y= Married_cod)) + 
+  geom_point(aes(color = as.factor(Married_cod)), shape = "I", size = 3) + 
+  geom_line(data = datos_curva, aes(y = probabilidad_married), color = "firebrick") +
+  geom_line(data =datos_curva, aes(y =limite_inferior), linetype = "dashed") +
+  geom_line(data =datos_curva, aes(y =limite_superior), linetype = "dashed") +
+  theme_bw() + labs(y ="P(Married = 1 | Rating)", x = "Puntaciónn Rating") +
+  theme(legend.position = "null") + 
+  theme(plot.title = element_text(size = 10))
+```
+
+De la @fig-log observamos que la probabilidad de estar casado aumenta a medida que la puntuación del rating incrementa. Para valores bajos de rating, la probabilidad de éxito es reducida, mientras que para valores altos, la probabilidad se acerca a 1.
+
+
+
+
+
+
+# Punto 7
+
+Calcule el porcentaje de correcta clasificación del modelo. Comente.
+
+
+```{r}
+#| echo: false
+# Comparación la clasificación real con la predicha.
+
+predicciones <- ifelse(test =modelo$fitted.values > 0.5, yes =1, no =0)
+matriz_confusion <- table(modelo$model$Married_cod, predicciones,
+                          dnn = c("observaciones", "predicciones"))
+matriz_confusion 
+```
+
+
+
+```{r}
+#| include: false
+# Porcentaje de observaciones clasificadas correctamente por el modelo
+(matriz_confusion[1,1]+matriz_confusion[2,2])/66*100
+```
+
+
+El modelo es capaz de clasificar correcatmente $\frac{5+34}{5+34+8+19}=0.59(59\%)$ de las observaciones.
+
+
+
+
+
+
+
+
+
+
+
+
+
